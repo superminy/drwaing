@@ -8,6 +8,7 @@
     <style>
         * {
             box-sizing: border-box;
+            touch-action: manipulation;
         }
 
         body {
@@ -77,7 +78,7 @@
 
         /* Question Header */
         .question-text {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
             color: #2d3436;
             margin: 4px 0;
@@ -105,8 +106,9 @@
             justify-content: center;
             align-items: center;
             padding: 6px;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.85);
             border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .item-emoji {
@@ -168,11 +170,6 @@
             color: white;
         }
 
-        .choice-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
         /* Modal Popup for Feedback */
         .feedback-overlay {
             position: fixed;
@@ -194,18 +191,20 @@
             text-align: center;
             animation: popIn 0.3s ease;
             max-width: 300px;
+            width: 90%;
         }
 
         .feedback-card h3 {
-            font-size: 32px;
+            font-size: 36px;
             margin: 0 0 10px 0;
         }
 
         .feedback-card p {
             font-size: 18px;
             font-weight: bold;
-            color: #555;
+            color: #2d3436;
             margin-bottom: 20px;
+            line-height: 1.4;
         }
 
         .next-btn {
@@ -217,6 +216,7 @@
             font-weight: bold;
             border-radius: 15px;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.3);
         }
 
         @keyframes popIn {
@@ -263,9 +263,9 @@
     <div class="game-card">
         <!-- 모드 선택 -->
         <div class="mode-tabs">
-            <button class="tab-btn active" onclick="setMode('add', this)">➕ 더하기</button>
-            <button class="tab-btn" onclick="setMode('sub', this)">➖ 빼기</button>
-            <button class="tab-btn" onclick="setMode('mix', this)">🎲 섞어서</button>
+            <button class="tab-btn active" onclick="setMode('add', event)">➕ 더하기</button>
+            <button class="tab-btn" onclick="setMode('sub', event)">➖ 빼기</button>
+            <button class="tab-btn" onclick="setMode('mix', event)">🎲 섞어서</button>
         </div>
 
         <!-- 스탬프 점수 -->
@@ -292,16 +292,32 @@
     </div>
 
     <script>
-        const emojiSet = ['🍎', '🍓', '🐥', '🧸', '🍭', '🍦', '🍩', '🦋', '🌸', '⭐', '🎈', '🍪'];
+        // 이모지 풀 확장 (24종)
+        const emojiSet = [
+            '🍎', '🍓', '🍌', '🍊', '🍇', '🍉', 
+            '🐥', '🧸', '🐶', '🐱', '🐰', '🐼', 
+            '🍭', '🍦', '🍩', '🍰', '🍪', '🚗', 
+            '🚀', '🎈', '⭐', '🌸', '⚽', '🎨'
+        ];
 
-        let currentMode = 'add'; // 'add', 'sub', 'mix'
+        // 다양한 칭찬 문구
+        const praiseList = [
+            '🎉 정답이에요! 참 잘했어요!',
+            '🌟 우와! 완벽해요!',
+            '👏 우와, 진짜 똑똑하네요!',
+            '🎈 대단해요! 최고예요!',
+            '🥳 천재 아니에요? 정답!'
+        ];
+
+        let currentMode = 'add'; 
         let num1 = 0, num2 = 0, answer = 0;
         let currentOp = '+';
         let score = 0;
-        let currentEmoji = '🍎';
-        let isAnswered = false; // 연타 방지 플래그
+        let emoji1 = '🍎', emoji2 = '🍌';
+        let isProcessing = false; 
+        let lastQuestionKey = ''; // 직전 문제 기억 (중복 방지)
 
-        // 싱글톤 오디오 컨텍스트
+        // 오디오 싱글톤
         let audioCtx = null;
         function playSound(type) {
             try {
@@ -323,6 +339,7 @@
                 };
 
                 const now = audioCtx.currentTime;
+
                 if (type === 'pop') {
                     osc.frequency.setValueAtTime(400, now);
                     osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
@@ -335,9 +352,9 @@
                     osc.frequency.setValueAtTime(659.25, now + 0.08);
                     osc.frequency.setValueAtTime(783.99, now + 0.16);
                     gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.28);
                     osc.start(now);
-                    osc.stop(now + 0.25);
+                    osc.stop(now + 0.28);
                 } else if (type === 'wrong') {
                     osc.frequency.setValueAtTime(220, now);
                     osc.frequency.setValueAtTime(160, now + 0.1);
@@ -346,38 +363,66 @@
                     osc.start(now);
                     osc.stop(now + 0.2);
                 }
-            } catch (e) { }
+            } catch (e) {}
         }
 
-        function setMode(mode, btnEl) {
+        function setMode(mode, evt) {
+            if (evt) {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                evt.target.classList.add('active');
+            }
             currentMode = mode;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            if (btnEl) btnEl.classList.add('active');
             generateQuestion();
         }
 
+        function getRandomEmojiPair() {
+            const idx1 = Math.floor(Math.random() * emojiSet.length);
+            let idx2 = Math.floor(Math.random() * emojiSet.length);
+            while (idx1 === idx2) {
+                idx2 = Math.floor(Math.random() * emojiSet.length);
+            }
+            return [emojiSet[idx1], emojiSet[idx2]];
+        }
+
         function generateQuestion() {
-            isAnswered = false; // 연타 잠금 해제
-            currentEmoji = emojiSet[Math.floor(Math.random() * emojiSet.length)];
+            isProcessing = false;
+            
+            // 이모지 2개 무작위 추출
+            [emoji1, emoji2] = getRandomEmojiPair();
 
             let isAdd = true;
-            if (currentMode === 'add') isAdd = true;
-            else if (currentMode === 'sub') isAdd = false;
-            else isAdd = Math.random() > 0.5;
+            let questionKey = '';
+            let attempts = 0;
 
-            currentOp = isAdd ? '+' : '-';
+            // 직전 문제와 동일한 문제 방지 루프
+            do {
+                if (currentMode === 'add') isAdd = true;
+                else if (currentMode === 'sub') isAdd = false;
+                else isAdd = Math.random() > 0.5;
+
+                if (isAdd) {
+                    num1 = Math.floor(Math.random() * 5) + 1; // 1~5
+                    num2 = Math.floor(Math.random() * 5) + 1; // 1~5
+                    answer = num1 + num2;
+                } else {
+                    num1 = Math.floor(Math.random() * 7) + 3; // 3~9
+                    const validNum2List = [];
+                    for (let i = 1; i < num1; i++) validNum2List.push(i);
+                    num2 = validNum2List[Math.floor(Math.random() * validNum2List.length)];
+                    answer = num1 - num2;
+                }
+
+                currentOp = isAdd ? '+' : '-';
+                questionKey = `${currentOp}_${num1}_${num2}`;
+                attempts++;
+            } while (questionKey === lastQuestionKey && attempts < 20);
+
+            lastQuestionKey = questionKey;
 
             if (isAdd) {
-                num1 = Math.floor(Math.random() * 5) + 1; // 1~5
-                num2 = Math.floor(Math.random() * 5) + 1; // 1~5
-                answer = num1 + num2;
-                document.getElementById('guideMsg').innerText = '✨ 이모지를 터치하며 합쳐진 개수를 세어보세요!';
+                document.getElementById('guideMsg').innerText = `✨ ${emoji1}와 ${emoji2}를 터치하며 합쳐진 개수를 세어보세요!`;
             } else {
-                // 빼기 문제 범위를 4~10으로 확대하여 다양한 조합 생성
-                num1 = Math.floor(Math.random() * 7) + 4; // 4~10
-                num2 = Math.floor(Math.random() * (num1 - 2)) + 1; // 1 ~ (num1-2) 로 설정하여 빼는 수 다양화
-                answer = num1 - num2;
-                document.getElementById('guideMsg').innerText = `💥 이모지를 ${num2}개 터치해서 톡! 터뜨려보세요!`;
+                document.getElementById('guideMsg').innerText = `💥 ${emoji1}를 ${num2}개 터치해서 톡! 터뜨려보세요!`;
             }
 
             document.getElementById('questionText').innerText = `${num1} ${currentOp} ${num2} = ?`;
@@ -391,30 +436,33 @@
             container.innerHTML = '';
 
             if (currentOp === '+') {
+                // 첫번째 이모지 그룹
                 const group1 = document.createElement('div');
                 group1.className = 'emoji-group';
                 for (let i = 0; i < num1; i++) {
-                    group1.appendChild(createEmojiEl());
+                    group1.appendChild(createEmojiEl(emoji1));
                 }
 
                 const op = document.createElement('span');
                 op.className = 'operator-icon';
                 op.innerText = '+';
 
+                // 두번째 이모지 그룹 (서로 다른 이모지)
                 const group2 = document.createElement('div');
                 group2.className = 'emoji-group';
                 for (let i = 0; i < num2; i++) {
-                    group2.appendChild(createEmojiEl());
+                    group2.appendChild(createEmojiEl(emoji2));
                 }
 
                 container.appendChild(group1);
                 container.appendChild(op);
                 container.appendChild(group2);
             } else {
+                // 빼기 그룹
                 const group = document.createElement('div');
                 group.className = 'emoji-group';
                 for (let i = 0; i < num1; i++) {
-                    const el = createEmojiEl();
+                    const el = createEmojiEl(emoji1);
                     el.onclick = function () {
                         playSound('pop');
                         this.classList.toggle('popped');
@@ -425,41 +473,43 @@
             }
         }
 
-        function createEmojiEl() {
+        function createEmojiEl(char) {
             const span = document.createElement('span');
             span.className = 'item-emoji';
-            span.innerText = currentEmoji;
+            span.innerText = char;
             span.onclick = function () {
                 playSound('pop');
-                this.style.transform = 'scale(1.3)';
-                setTimeout(() => this.style.transform = 'none', 120);
+                this.style.transform = 'scale(1.4)';
+                setTimeout(() => this.style.transform = 'none', 150);
             };
             return span;
         }
 
-        // 반복문(while) 없이 100% 안전하게 4개의 보기를 생성하는 로직
         function renderChoices() {
             const grid = document.getElementById('choicesGrid');
             grid.innerHTML = '';
 
-            const candidates = new Set();
-            
-            // 정답 근처 오답 후보 추가
-            [-3, -2, -1, 1, 2, 3, 4, 5].forEach(offset => {
-                let val = answer + offset;
-                if (val > 0 && val !== answer) {
-                    candidates.add(val);
-                }
-            });
+            const choiceSet = new Set();
+            choiceSet.add(answer);
 
-            // 기본 1~10 수 백업 추가
-            for (let i = 1; i <= 10; i++) {
-                if (i !== answer) candidates.add(i);
+            const wrongCandidates = [];
+            for (let i = 1; i <= 12; i++) {
+                if (i !== answer) {
+                    wrongCandidates.push(i);
+                }
             }
 
-            // 무작위로 3개 추출 후 정답과 섞기
-            const wrongList = Array.from(candidates).sort(() => Math.random() - 0.5).slice(0, 3);
-            const finalChoices = [answer, ...wrongList].sort(() => Math.random() - 0.5);
+            wrongCandidates.sort(() => Math.random() - 0.5);
+
+            for (let num of wrongCandidates) {
+                if (choiceSet.size < 4) {
+                    choiceSet.add(num);
+                } else {
+                    break;
+                }
+            }
+
+            const finalChoices = Array.from(choiceSet).sort(() => Math.random() - 0.5);
 
             finalChoices.forEach(val => {
                 const btn = document.createElement('button');
@@ -471,8 +521,8 @@
         }
 
         function checkAnswer(selected) {
-            if (isAnswered) return; // 연타 방지
-            isAnswered = true;
+            if (isProcessing) return;
+            isProcessing = true;
 
             const overlay = document.getElementById('feedbackOverlay');
             const emojiEl = document.getElementById('feedbackEmoji');
@@ -482,8 +532,11 @@
                 playSound('correct');
                 score++;
                 document.getElementById('scoreBoard').innerText = `⭐ 참 잘했어요: ${score}개`;
-                emojiEl.innerText = '🎉';
-                textEl.innerText = '정답이에요! 잘했어요!';
+                
+                // 무작위 칭찬 메시지 및 이모지
+                const randomPraise = praiseList[Math.floor(Math.random() * praiseList.length)];
+                emojiEl.innerText = ['🎉', '🌟', '🥳', '🏆', '🎊'][Math.floor(Math.random() * 5)];
+                textEl.innerText = randomPraise;
             } else {
                 playSound('wrong');
                 emojiEl.innerText = '😅';
@@ -497,7 +550,7 @@
             generateQuestion();
         }
 
-        // 초기 시작
+        // 게임 시작
         generateQuestion();
     </script>
 </body>
