@@ -363,7 +363,7 @@
     </div>
 
     <script>
-        // 숫자 3가지 표기 사전 (1, 일, 하나)
+        // 숫자 3가지 표기 사전
         const numberNames = {
             1: { digit: '1', sino: '일', native: '하나' },
             2: { digit: '2', sino: '이', native: '둘' },
@@ -379,7 +379,6 @@
             12: { digit: '12', sino: '십이', native: '열둘' }
         };
 
-        // 이모지 풀 확장 (24종)
         const emojiSet = [
             '🍎', '🍓', '🍌', '🍊', '🍇', '🍉', 
             '🐥', '🧸', '🐶', '🐱', '🐰', '🐼', 
@@ -387,7 +386,6 @@
             '🚀', '🎈', '⭐', '🌸', '⚽', '🎨'
         ];
 
-        // 다양한 칭찬 문구
         const praiseList = [
             '🎉 정답이에요! 참 잘했어요!',
             '🌟 우와! 완벽해요!',
@@ -396,23 +394,22 @@
             '🥳 천재 아니에요? 정답!'
         ];
 
-        let currentMode = 'add';      // 'add', 'sub', 'mix'
-        let numFormat = 'digit';      // 'digit', 'sino', 'native'
+        let currentMode = 'add';      
+        let numFormat = 'digit';      
         let num1 = 0, num2 = 0, answer = 0;
         let currentOp = '+';
         let score = 0;
         let emoji1 = '🍎', emoji2 = '🍌';
         let isProcessing = false; 
         let lastQuestionKey = ''; 
-        let currentChoiceOptions = []; // 현재 문제의 선택지 값 목록
+        let currentChoiceOptions = []; 
+        let wrongChoices = new Set(); // 현재 문제에서 틀린 보기 숫자들을 저장할 객체
 
-        // 숫자 포맷 변환 함수
         function formatNum(n, fmt = numFormat) {
             if (!numberNames[n]) return n.toString();
             return numberNames[n][fmt] || n.toString();
         }
 
-        // 오디오 효과음
         let audioCtx = null;
         function playSound(type) {
             try {
@@ -461,7 +458,6 @@
             } catch (e) {}
         }
 
-        // 연산 모드 변경 (더하기, 빼기, 섞어서)
         function setMode(mode, evt) {
             if (evt) {
                 const parent = evt.target.parentElement;
@@ -472,7 +468,6 @@
             generateQuestion();
         }
 
-        // 표기 방식 변경 (숫자, 한자어, 순우리말)
         function setNumFormat(fmt, evt) {
             if (evt) {
                 const parent = evt.target.parentElement;
@@ -480,8 +475,6 @@
                 evt.target.classList.add('active');
             }
             numFormat = fmt;
-            
-            // 문제와 선택지 텍스트를 즉시 새 표기 방식으로 업데이트
             updateUIByFormat();
         }
 
@@ -496,7 +489,8 @@
 
         function generateQuestion() {
             isProcessing = false;
-            
+            wrongChoices.clear(); // ⭐ 새 문제 생성 시 오답 기록 초기화
+
             [emoji1, emoji2] = getRandomEmojiPair();
 
             let isAdd = true;
@@ -509,11 +503,11 @@
                 else isAdd = Math.random() > 0.5;
 
                 if (isAdd) {
-                    num1 = Math.floor(Math.random() * 5) + 1; // 1~5
-                    num2 = Math.floor(Math.random() * 5) + 1; // 1~5
+                    num1 = Math.floor(Math.random() * 5) + 1;
+                    num2 = Math.floor(Math.random() * 5) + 1;
                     answer = num1 + num2;
                 } else {
-                    num1 = Math.floor(Math.random() * 7) + 3; // 3~9
+                    num1 = Math.floor(Math.random() * 7) + 3;
                     const validNum2List = [];
                     for (let i = 1; i < num1; i++) validNum2List.push(i);
                     num2 = validNum2List[Math.floor(Math.random() * validNum2List.length)];
@@ -527,7 +521,6 @@
 
             lastQuestionKey = questionKey;
 
-            // 선택지 4개 새로 생성
             const choiceSet = new Set();
             choiceSet.add(answer);
 
@@ -548,9 +541,7 @@
             updateUIByFormat();
         }
 
-        // 화면 텍스트들을 선택된 표기 방식에 맞춰 즉시 갱신
         function updateUIByFormat() {
-            // 1. 문제 텍스트 (한자어/순우리말 선택 시 계산식에도 괄호 안 아라비아 숫자 표기)
             let str1 = formatNum(num1);
             let str2 = formatNum(num2);
 
@@ -561,14 +552,12 @@
 
             document.getElementById('questionText').innerText = `${str1} ${currentOp} ${str2} = ?`;
 
-            // 2. 가이드 메시지
             if (currentOp === '+') {
                 document.getElementById('guideMsg').innerText = `✨ ${emoji1}와 ${emoji2}를 터치하며 합쳐진 개수를 세어보세요!`;
             } else {
                 document.getElementById('guideMsg').innerText = `💥 ${emoji1}를 ${str2}개 터치해서 톡! 터뜨려보세요!`;
             }
 
-            // 3. 선택지 버튼들 갱신
             renderChoices();
         }
 
@@ -625,13 +614,6 @@
 
         function renderChoices() {
             const grid = document.getElementById('choicesGrid');
-            
-            // 이전에 사용자가 틀려서 비활성화된 보기 상태를 보존
-            const existingDisabledValues = new Set();
-            grid.querySelectorAll('.wrong-choice').forEach(btn => {
-                if (btn.dataset.val) existingDisabledValues.add(parseInt(btn.dataset.val));
-            });
-
             grid.innerHTML = '';
 
             currentChoiceOptions.forEach(val => {
@@ -639,14 +621,13 @@
                 btn.className = 'choice-btn';
                 btn.dataset.val = val;
 
-                // 이미 이 문제에서 틀렸던 보기라면 비활성화 유지
-                if (existingDisabledValues.has(val)) {
+                // ⭐ 현재 문제에서 틀렸던 번호만 비활성화 유지
+                if (wrongChoices.has(val)) {
                     btn.classList.add('wrong-choice');
                 }
 
                 const formattedVal = formatNum(val, numFormat);
                 
-                // 표기 방식이 문자(한자어/순우리말)일 때는 보조 수치(아라비아 숫자)를 작게 아래 표시
                 let subHtml = '';
                 if (numFormat !== 'digit') {
                     subHtml = `<div class="choice-sub">(${val})</div>`;
@@ -685,10 +666,11 @@
                 modalBtn.onclick = nextQuestion;
             } else {
                 playSound('wrong');
+                wrongChoices.add(selected); // ⭐ 현재 문제 오답 번호 기록
+
                 emojiEl.innerText = '💪';
                 textEl.innerText = '아쉬워요! 다시 한 번 차근차근 세어볼까요?';
 
-                // 틀린 보기 비활성화 표시
                 if (btnEl) {
                     btnEl.classList.add('wrong-choice');
                 }
@@ -700,19 +682,16 @@
             overlay.style.display = 'flex';
         }
 
-        // 오답 후 같은 문제 다시 풀기
         function retryCurrentQuestion() {
             document.getElementById('feedbackOverlay').style.display = 'none';
-            isProcessing = false; // 선택 다시 허용
+            isProcessing = false;
         }
 
-        // 정답 맞춘 후 다음 문제로 이동
         function nextQuestion() {
             document.getElementById('feedbackOverlay').style.display = 'none';
             generateQuestion();
         }
 
-        // 게임 시작
         generateQuestion();
     </script>
 </body>
