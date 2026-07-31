@@ -179,22 +179,29 @@
         }
 
         .reward-emoji {
-            font-size: 130px;
-            line-height: 1.2;
-            margin-bottom: 10px;
+            font-size: 120px;
+            line-height: 1.1;
+            margin-bottom: 5px;
             display: block;
         }
 
         .reward-word {
-            font-size: 3.5em;
+            font-size: 3.2em;
             font-family: 'Fredoka', sans-serif;
             color: #2e7d32;
-            text-shadow: 2px 2px 0px #fff, 4px 4px 0px #a5d6a7;
-            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #fff, 3px 3px 0px #a5d6a7;
+            margin-bottom: 2px;
+        }
+
+        .reward-kor {
+            font-size: 2.2em;
+            font-family: 'Jua', sans-serif;
+            color: #388e3c;
+            margin-bottom: 12px;
         }
 
         .success-text {
-            font-size: 1.8em;
+            font-size: 1.5em;
             color: #fbc02d;
             margin-bottom: 20px;
         }
@@ -263,7 +270,7 @@
                     <polygon points="0 0, 9 3.5, 0 7" fill="#2e7d32" />
                 </marker>
             </defs>
-            <text id="bg-text" x="150" y="215" text-anchor="middle" dominant-baseline="central"
+            <text id="bg-text" x="150" y="225" text-anchor="middle" dominant-baseline="central"
                 font-family="'Fredoka', 'Jua', sans-serif" font-size="250" font-weight="bold" fill="#e8e8e8">A</text>
             <g id="arrow-group"></g>
         </svg>
@@ -278,6 +285,7 @@
         <div class="success-content">
             <div id="reward-visual"></div>
             <div class="reward-word" id="reward-word">Apple</div>
+            <div class="reward-kor" id="reward-kor">사과</div>
             <div class="success-text">Great Job! (참 잘했어요!)</div>
             <button class="btn-action" style="background:#4caf50;" onclick="nextChar()">다음 글자!</button>
         </div>
@@ -292,226 +300,227 @@
         const selectorContainer = document.getElementById('selector');
         const rewardVisualEl = document.getElementById('reward-visual');
         const rewardWordEl = document.getElementById('reward-word');
+        const rewardKorEl = document.getElementById('reward-kor');
 
         const width = 300;
         const height = 400;
 
-        // 알파벳 데이터 (A-Z)
+        // 알파벳 데이터 (A-Z) - Y축 좌표를 +30px 하향 조정하여 중앙 배치
         const alphabets = [
             {
                 char: 'A',
-                rewards: [{ word: "Apple", fallback: "🍎" }, { word: "Ant", fallback: "🐜" }, { word: "Airplane", fallback: "✈️" }],
+                rewards: [{ word: "Apple", kor: "사과", fallback: "🍎" }, { word: "Ant", kor: "개미", fallback: "🐜" }, { word: "Airplane", kor: "비행기", fallback: "✈️" }],
                 strokes: [
-                    { path: "M 150 70 L 80 270", num: { x: 140, y: 70, text: "1" }, checkpoints: [{ x: 150, y: 70 }, { x: 80, y: 270 }] },
-                    { path: "M 150 70 L 220 270", num: { x: 160, y: 70, text: "2" }, checkpoints: [{ x: 150, y: 70 }, { x: 220, y: 270 }] },
-                    { path: "M 105 190 L 195 190", num: { x: 105, y: 175, text: "3" }, checkpoints: [{ x: 105, y: 190 }, { x: 195, y: 190 }] }
+                    { path: "M 150 100 L 80 300", num: { x: 140, y: 100, text: "1" }, checkpoints: [{ x: 150, y: 100 }, { x: 80, y: 300 }] },
+                    { path: "M 150 100 L 220 300", num: { x: 160, y: 100, text: "2" }, checkpoints: [{ x: 150, y: 100 }, { x: 220, y: 300 }] },
+                    { path: "M 105 220 L 195 220", num: { x: 105, y: 205, text: "3" }, checkpoints: [{ x: 105, y: 220 }, { x: 195, y: 220 }] }
                 ]
             },
             {
                 char: 'B',
-                rewards: [{ word: "Banana", fallback: "🍌" }, { word: "Bear", fallback: "🐻" }, { word: "Ball", fallback: "⚽" }],
+                rewards: [{ word: "Banana", kor: "바나나", fallback: "🍌" }, { word: "Bear", kor: "곰", fallback: "🐻" }, { word: "Ball", kor: "공", fallback: "⚽" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 90 70 C 210 70 210 170 90 170", num: { x: 105, y: 55, text: "2" }, checkpoints: [{ x: 90, y: 70 }, { x: 190, y: 120 }, { x: 90, y: 170 }] },
-                    { path: "M 90 170 C 220 170 220 270 90 270", num: { x: 105, y: 180, text: "3" }, checkpoints: [{ x: 90, y: 170 }, { x: 200, y: 220 }, { x: 90, y: 270 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 90 100 C 210 100 210 200 90 200", num: { x: 105, y: 85, text: "2" }, checkpoints: [{ x: 90, y: 100 }, { x: 190, y: 150 }, { x: 90, y: 200 }] },
+                    { path: "M 90 200 C 220 200 220 300 90 300", num: { x: 105, y: 210, text: "3" }, checkpoints: [{ x: 90, y: 200 }, { x: 200, y: 250 }, { x: 90, y: 300 }] }
                 ]
             },
             {
                 char: 'C',
-                rewards: [{ word: "Cat", fallback: "🐱" }, { word: "Car", fallback: "🚗" }, { word: "Cake", fallback: "🍰" }],
+                rewards: [{ word: "Cat", kor: "고양이", fallback: "🐱" }, { word: "Car", kor: "자동차", fallback: "🚗" }, { word: "Cake", kor: "케이크", fallback: "🍰" }],
                 strokes: [
-                    { path: "M 210 100 C 90 60 90 280 210 240", num: { x: 210, y: 85, text: "1" }, checkpoints: [{ x: 210, y: 100 }, { x: 100, y: 170 }, { x: 210, y: 240 }] }
+                    { path: "M 210 130 C 90 90 90 310 210 270", num: { x: 210, y: 115, text: "1" }, checkpoints: [{ x: 210, y: 130 }, { x: 100, y: 200 }, { x: 210, y: 270 }] }
                 ]
             },
             {
                 char: 'D',
-                rewards: [{ word: "Dog", fallback: "🐶" }, { word: "Duck", fallback: "🦆" }, { word: "Donut", fallback: "🍩" }],
+                rewards: [{ word: "Dog", kor: "강아지", fallback: "🐶" }, { word: "Duck", kor: "오리", fallback: "🦆" }, { word: "Donut", kor: "도넛", fallback: "🍩" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 90 70 C 240 70 240 270 90 270", num: { x: 105, y: 55, text: "2" }, checkpoints: [{ x: 90, y: 70 }, { x: 220, y: 170 }, { x: 90, y: 270 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 90 100 C 240 100 240 300 90 300", num: { x: 105, y: 85, text: "2" }, checkpoints: [{ x: 90, y: 100 }, { x: 220, y: 200 }, { x: 90, y: 300 }] }
                 ]
             },
             {
                 char: 'E',
-                rewards: [{ word: "Elephant", fallback: "🐘" }, { word: "Egg", fallback: "🥚" }, { word: "Earth", fallback: "🌍" }],
+                rewards: [{ word: "Elephant", kor: "코끼리", fallback: "🐘" }, { word: "Egg", kor: "계란", fallback: "🥚" }, { word: "Earth", kor: "지구", fallback: "🌍" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 90 70 L 210 70", num: { x: 105, y: 55, text: "2" }, checkpoints: [{ x: 90, y: 70 }, { x: 210, y: 70 }] },
-                    { path: "M 90 170 L 190 170", num: { x: 105, y: 155, text: "3" }, checkpoints: [{ x: 90, y: 170 }, { x: 190, y: 170 }] },
-                    { path: "M 90 270 L 210 270", num: { x: 105, y: 255, text: "4" }, checkpoints: [{ x: 90, y: 270 }, { x: 210, y: 270 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 90 100 L 210 100", num: { x: 105, y: 85, text: "2" }, checkpoints: [{ x: 90, y: 100 }, { x: 210, y: 100 }] },
+                    { path: "M 90 200 L 190 200", num: { x: 105, y: 185, text: "3" }, checkpoints: [{ x: 90, y: 200 }, { x: 190, y: 200 }] },
+                    { path: "M 90 300 L 210 300", num: { x: 105, y: 285, text: "4" }, checkpoints: [{ x: 90, y: 300 }, { x: 210, y: 300 }] }
                 ]
             },
             {
                 char: 'F',
-                rewards: [{ word: "Fish", fallback: "🐟" }, { word: "Fox", fallback: "🦊" }, { word: "Flower", fallback: "🌸" }],
+                rewards: [{ word: "Fish", kor: "물고기", fallback: "🐟" }, { word: "Fox", kor: "여우", fallback: "🦊" }, { word: "Flower", kor: "꽃", fallback: "🌸" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 90 70 L 210 70", num: { x: 105, y: 55, text: "2" }, checkpoints: [{ x: 90, y: 70 }, { x: 210, y: 70 }] },
-                    { path: "M 90 170 L 190 170", num: { x: 105, y: 155, text: "3" }, checkpoints: [{ x: 90, y: 170 }, { x: 190, y: 170 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 90 100 L 210 100", num: { x: 105, y: 85, text: "2" }, checkpoints: [{ x: 90, y: 100 }, { x: 210, y: 100 }] },
+                    { path: "M 90 200 L 190 200", num: { x: 105, y: 185, text: "3" }, checkpoints: [{ x: 90, y: 200 }, { x: 190, y: 200 }] }
                 ]
             },
             {
                 char: 'G',
-                rewards: [{ word: "Giraffe", fallback: "🦒" }, { word: "Grapes", fallback: "🍇" }, { word: "Gift", fallback: "🎁" }],
+                rewards: [{ word: "Giraffe", kor: "기린", fallback: "🦒" }, { word: "Grapes", kor: "포도", fallback: "🍇" }, { word: "Gift", kor: "선물", fallback: "🎁" }],
                 strokes: [
-                    { path: "M 210 100 C 80 60 80 280 210 270 L 210 180 L 160 180", num: { x: 210, y: 85, text: "1" }, checkpoints: [{ x: 210, y: 100 }, { x: 90, y: 170 }, { x: 210, y: 270 }, { x: 210, y: 180 }, { x: 160, y: 180 }] }
+                    { path: "M 210 130 C 80 90 80 310 210 300 L 210 210 L 160 210", num: { x: 210, y: 115, text: "1" }, checkpoints: [{ x: 210, y: 130 }, { x: 90, y: 200 }, { x: 210, y: 300 }, { x: 210, y: 210 }, { x: 160, y: 210 }] }
                 ]
             },
             {
                 char: 'H',
-                rewards: [{ word: "House", fallback: "🏠" }, { word: "Hat", fallback: "🧢" }, { word: "Heart", fallback: "❤️" }],
+                rewards: [{ word: "House", kor: "집", fallback: "🏠" }, { word: "Hat", kor: "모자", fallback: "🧢" }, { word: "Heart", kor: "하트", fallback: "❤️" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 210 70 L 210 270", num: { x: 225, y: 70, text: "2" }, checkpoints: [{ x: 210, y: 70 }, { x: 210, y: 270 }] },
-                    { path: "M 90 170 L 210 170", num: { x: 105, y: 155, text: "3" }, checkpoints: [{ x: 90, y: 170 }, { x: 210, y: 170 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 210 100 L 210 300", num: { x: 225, y: 100, text: "2" }, checkpoints: [{ x: 210, y: 100 }, { x: 210, y: 300 }] },
+                    { path: "M 90 200 L 210 200", num: { x: 105, y: 185, text: "3" }, checkpoints: [{ x: 90, y: 200 }, { x: 210, y: 200 }] }
                 ]
             },
             {
                 char: 'I',
-                rewards: [{ word: "Ice cream", fallback: "🍦" }, { word: "Island", fallback: "🏝️" }, { word: "Igloo", fallback: "🛖" }],
+                rewards: [{ word: "Ice cream", kor: "아이스크림", fallback: "🍦" }, { word: "Island", kor: "섬", fallback: "🏝️" }, { word: "Igloo", kor: "이글루", fallback: "🛖" }],
                 strokes: [
-                    { path: "M 100 80 L 200 80", num: { x: 85, y: 80, text: "1" }, checkpoints: [{ x: 100, y: 80 }, { x: 200, y: 80 }] },
-                    { path: "M 150 80 L 150 270", num: { x: 135, y: 95, text: "2" }, checkpoints: [{ x: 150, y: 80 }, { x: 150, y: 270 }] },
-                    { path: "M 100 270 L 200 270", num: { x: 85, y: 270, text: "3" }, checkpoints: [{ x: 100, y: 270 }, { x: 200, y: 270 }] }
+                    { path: "M 100 110 L 200 110", num: { x: 85, y: 110, text: "1" }, checkpoints: [{ x: 100, y: 110 }, { x: 200, y: 110 }] },
+                    { path: "M 150 110 L 150 300", num: { x: 135, y: 125, text: "2" }, checkpoints: [{ x: 150, y: 110 }, { x: 150, y: 300 }] },
+                    { path: "M 100 300 L 200 300", num: { x: 85, y: 300, text: "3" }, checkpoints: [{ x: 100, y: 300 }, { x: 200, y: 300 }] }
                 ]
             },
             {
                 char: 'J',
-                rewards: [{ word: "Juice", fallback: "🧃" }, { word: "Jellyfish", fallback: "🪼" }, { word: "Jet", fallback: "✈️" }],
+                rewards: [{ word: "Juice", kor: "주스", fallback: "🧃" }, { word: "Jellyfish", kor: "해파리", fallback: "🪼" }, { word: "Jet", kor: "비행기", fallback: "✈️" }],
                 strokes: [
-                    { path: "M 110 80 L 210 80", num: { x: 95, y: 80, text: "1" }, checkpoints: [{ x: 110, y: 80 }, { x: 210, y: 80 }] },
-                    { path: "M 175 80 L 175 210 C 175 280 95 280 95 210", num: { x: 190, y: 95, text: "2" }, checkpoints: [{ x: 175, y: 80 }, { x: 175, y: 210 }, { x: 95, y: 210 }] }
+                    { path: "M 110 110 L 210 110", num: { x: 95, y: 110, text: "1" }, checkpoints: [{ x: 110, y: 110 }, { x: 210, y: 110 }] },
+                    { path: "M 175 110 L 175 240 C 175 310 95 310 95 240", num: { x: 190, y: 125, text: "2" }, checkpoints: [{ x: 175, y: 110 }, { x: 175, y: 240 }, { x: 95, y: 240 }] }
                 ]
             },
             {
                 char: 'K',
-                rewards: [{ word: "Kangaroo", fallback: "𦦵" }, { word: "Key", fallback: "🔑" }, { word: "Kite", fallback: "🪁" }],
+                rewards: [{ word: "Kangaroo", kor: "캥거루", fallback: "𦦵" }, { word: "Key", kor: "열쇠", fallback: "🔑" }, { word: "Kite", kor: "연", fallback: "🪁" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 200 70 L 90 170", num: { x: 200, y: 55, text: "2" }, checkpoints: [{ x: 200, y: 70 }, { x: 90, y: 170 }] },
-                    { path: "M 110 150 L 210 270", num: { x: 125, y: 135, text: "3" }, checkpoints: [{ x: 110, y: 150 }, { x: 210, y: 270 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 200 100 L 90 200", num: { x: 200, y: 85, text: "2" }, checkpoints: [{ x: 200, y: 100 }, { x: 90, y: 200 }] },
+                    { path: "M 110 180 L 210 300", num: { x: 125, y: 165, text: "3" }, checkpoints: [{ x: 110, y: 180 }, { x: 210, y: 300 }] }
                 ]
             },
             {
                 char: 'L',
-                rewards: [{ word: "Lion", fallback: "🦁" }, { word: "Lemon", fallback: "🍋" }, { word: "Leaf", fallback: "🍃" }],
+                rewards: [{ word: "Lion", kor: "사자", fallback: "🦁" }, { word: "Lemon", kor: "레몬", fallback: "🍋" }, { word: "Leaf", kor: "나뭇잎", fallback: "🍃" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270 L 210 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }, { x: 210, y: 270 }] }
+                    { path: "M 90 100 L 90 300 L 210 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }, { x: 210, y: 300 }] }
                 ]
             },
             {
                 char: 'M',
-                rewards: [{ word: "Monkey", fallback: "🐒" }, { word: "Moon", fallback: "🌙" }, { word: "Milk", fallback: "🥛" }],
+                rewards: [{ word: "Monkey", kor: "원숭이", fallback: "🐒" }, { word: "Moon", kor: "달", fallback: "🌙" }, { word: "Milk", kor: "우유", fallback: "🥛" }],
                 strokes: [
-                    { path: "M 70 270 L 70 70", num: { x: 70, y: 285, text: "1" }, checkpoints: [{ x: 70, y: 270 }, { x: 70, y: 70 }] },
-                    { path: "M 70 70 L 150 200", num: { x: 80, y: 55, text: "2" }, checkpoints: [{ x: 70, y: 70 }, { x: 150, y: 200 }] },
-                    { path: "M 150 200 L 230 70", num: { x: 150, y: 215, text: "3" }, checkpoints: [{ x: 150, y: 200 }, { x: 230, y: 70 }] },
-                    { path: "M 230 70 L 230 270", num: { x: 245, y: 70, text: "4" }, checkpoints: [{ x: 230, y: 70 }, { x: 230, y: 270 }] }
+                    { path: "M 70 300 L 70 100", num: { x: 70, y: 315, text: "1" }, checkpoints: [{ x: 70, y: 300 }, { x: 70, y: 100 }] },
+                    { path: "M 70 100 L 150 230", num: { x: 80, y: 85, text: "2" }, checkpoints: [{ x: 70, y: 100 }, { x: 150, y: 230 }] },
+                    { path: "M 150 230 L 230 100", num: { x: 150, y: 245, text: "3" }, checkpoints: [{ x: 150, y: 230 }, { x: 230, y: 100 }] },
+                    { path: "M 230 100 L 230 300", num: { x: 245, y: 100, text: "4" }, checkpoints: [{ x: 230, y: 100 }, { x: 230, y: 300 }] }
                 ]
             },
             {
                 char: 'N',
-                rewards: [{ word: "Nest", fallback: "🪹" }, { word: "Nine", fallback: "9️⃣" }, { word: "Night", fallback: "🌃" }],
+                rewards: [{ word: "Nest", kor: "새둥지", fallback: "🪹" }, { word: "Nine", kor: "숫자 9", fallback: "9️⃣" }, { word: "Night", kor: "밤", fallback: "🌃" }],
                 strokes: [
-                    { path: "M 80 70 L 80 270", num: { x: 65, y: 70, text: "1" }, checkpoints: [{ x: 80, y: 70 }, { x: 80, y: 270 }] },
-                    { path: "M 80 70 L 220 270", num: { x: 95, y: 85, text: "2" }, checkpoints: [{ x: 80, y: 70 }, { x: 220, y: 270 }] },
-                    { path: "M 220 70 L 220 270", num: { x: 235, y: 70, text: "3" }, checkpoints: [{ x: 220, y: 70 }, { x: 220, y: 270 }] }
+                    { path: "M 80 100 L 80 300", num: { x: 65, y: 100, text: "1" }, checkpoints: [{ x: 80, y: 100 }, { x: 80, y: 300 }] },
+                    { path: "M 80 100 L 220 300", num: { x: 95, y: 115, text: "2" }, checkpoints: [{ x: 80, y: 100 }, { x: 220, y: 300 }] },
+                    { path: "M 220 100 L 220 300", num: { x: 235, y: 100, text: "3" }, checkpoints: [{ x: 220, y: 100 }, { x: 220, y: 300 }] }
                 ]
             },
             {
                 char: 'O',
-                rewards: [{ word: "Owl", fallback: "🦉" }, { word: "Orange", fallback: "🍊" }, { word: "Octopus", fallback: "🐙" }],
+                rewards: [{ word: "Owl", kor: "올빼미", fallback: "🦉" }, { word: "Orange", kor: "오렌지", fallback: "🍊" }, { word: "Octopus", kor: "문어", fallback: "🐙" }],
                 strokes: [
-                    { path: "M 150 70 C 60 70 60 270 150 270 C 240 270 240 70 150 70", num: { x: 150, y: 55, text: "1" }, checkpoints: [{ x: 150, y: 70 }, { x: 70, y: 170 }, { x: 150, y: 270 }, { x: 230, y: 170 }] }
+                    { path: "M 150 100 C 60 100 60 300 150 300 C 240 300 240 100 150 100", num: { x: 150, y: 85, text: "1" }, checkpoints: [{ x: 150, y: 100 }, { x: 70, y: 200 }, { x: 150, y: 300 }, { x: 230, y: 200 }] }
                 ]
             },
             {
                 char: 'P',
-                rewards: [{ word: "Panda", fallback: "🐼" }, { word: "Pizza", fallback: "🍕" }, { word: "Penguin", fallback: "🐧" }],
+                rewards: [{ word: "Panda", kor: "판다", fallback: "🐼" }, { word: "Pizza", kor: "피자", fallback: "🍕" }, { word: "Penguin", kor: "펭귄", fallback: "🐧" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 90 70 C 210 70 210 170 90 170", num: { x: 105, y: 55, text: "2" }, checkpoints: [{ x: 90, y: 70 }, { x: 190, y: 120 }, { x: 90, y: 170 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 90 100 C 210 100 210 200 90 200", num: { x: 105, y: 85, text: "2" }, checkpoints: [{ x: 90, y: 100 }, { x: 190, y: 150 }, { x: 90, y: 200 }] }
                 ]
             },
             {
                 char: 'Q',
-                rewards: [{ word: "Queen", fallback: "👸" }, { word: "Question", fallback: "❓" }, { word: "Quail", fallback: "🐦" }],
+                rewards: [{ word: "Queen", kor: "여왕", fallback: "👸" }, { word: "Question", kor: "질문", fallback: "❓" }, { word: "Quail", kor: "메추라기", fallback: "🐦" }],
                 strokes: [
-                    { path: "M 150 70 C 60 70 60 270 150 270 C 240 270 240 70 150 70", num: { x: 150, y: 55, text: "1" }, checkpoints: [{ x: 150, y: 70 }, { x: 70, y: 170 }, { x: 150, y: 270 }, { x: 230, y: 170 }] },
-                    { path: "M 170 190 L 230 260", num: { x: 160, y: 180, text: "2" }, checkpoints: [{ x: 170, y: 190 }, { x: 230, y: 260 }] }
+                    { path: "M 150 100 C 60 100 60 300 150 300 C 240 300 240 100 150 100", num: { x: 150, y: 85, text: "1" }, checkpoints: [{ x: 150, y: 100 }, { x: 70, y: 200 }, { x: 150, y: 300 }, { x: 230, y: 200 }] },
+                    { path: "M 170 220 L 230 290", num: { x: 160, y: 210, text: "2" }, checkpoints: [{ x: 170, y: 220 }, { x: 230, y: 290 }] }
                 ]
             },
             {
                 char: 'R',
-                rewards: [{ word: "Rabbit", fallback: "🐰" }, { word: "Rainbow", fallback: "🌈" }, { word: "Robot", fallback: "🤖" }],
+                rewards: [{ word: "Rabbit", kor: "토끼", fallback: "🐰" }, { word: "Rainbow", kor: "무지개", fallback: "🌈" }, { word: "Robot", kor: "로봇", fallback: "🤖" }],
                 strokes: [
-                    { path: "M 90 70 L 90 270", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 270 }] },
-                    { path: "M 90 70 C 210 70 210 170 90 170", num: { x: 105, y: 55, text: "2" }, checkpoints: [{ x: 90, y: 70 }, { x: 190, y: 120 }, { x: 90, y: 170 }] },
-                    { path: "M 130 170 L 210 270", num: { x: 145, y: 175, text: "3" }, checkpoints: [{ x: 130, y: 170 }, { x: 210, y: 270 }] }
+                    { path: "M 90 100 L 90 300", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 300 }] },
+                    { path: "M 90 100 C 210 100 210 200 90 200", num: { x: 105, y: 85, text: "2" }, checkpoints: [{ x: 90, y: 100 }, { x: 190, y: 150 }, { x: 90, y: 200 }] },
+                    { path: "M 130 200 L 210 300", num: { x: 145, y: 205, text: "3" }, checkpoints: [{ x: 130, y: 200 }, { x: 210, y: 300 }] }
                 ]
             },
             {
                 char: 'S',
-                rewards: [{ word: "Sun", fallback: "☀️" }, { word: "Snake", fallback: "🐍" }, { word: "Star", fallback: "⭐" }],
+                rewards: [{ word: "Sun", kor: "태양", fallback: "☀️" }, { word: "Snake", kor: "뱀", fallback: "🐍" }, { word: "Star", kor: "별", fallback: "⭐" }],
                 strokes: [
-                    { path: "M 210 100 C 100 60 90 160 150 170 C 220 180 200 280 90 240", num: { x: 210, y: 85, text: "1" }, checkpoints: [{ x: 210, y: 100 }, { x: 110, y: 110 }, { x: 150, y: 170 }, { x: 190, y: 220 }, { x: 90, y: 240 }] }
+                    { path: "M 210 130 C 100 90 90 190 150 200 C 220 210 200 310 90 270", num: { x: 210, y: 115, text: "1" }, checkpoints: [{ x: 210, y: 130 }, { x: 110, y: 140 }, { x: 150, y: 200 }, { x: 190, y: 250 }, { x: 90, y: 270 }] }
                 ]
             },
             {
                 char: 'T',
-                rewards: [{ word: "Tiger", fallback: "🐯" }, { word: "Tree", fallback: "🌳" }, { word: "Train", fallback: "🚂" }],
+                rewards: [{ word: "Tiger", kor: "호랑이", fallback: "🐯" }, { word: "Tree", kor: "나무", fallback: "🌳" }, { word: "Train", kor: "기차", fallback: "🚂" }],
                 strokes: [
-                    { path: "M 80 70 L 220 70", num: { x: 65, y: 70, text: "1" }, checkpoints: [{ x: 80, y: 70 }, { x: 220, y: 70 }] },
-                    { path: "M 150 70 L 150 270", num: { x: 135, y: 85, text: "2" }, checkpoints: [{ x: 150, y: 70 }, { x: 150, y: 270 }] }
+                    { path: "M 80 100 L 220 100", num: { x: 65, y: 100, text: "1" }, checkpoints: [{ x: 80, y: 100 }, { x: 220, y: 100 }] },
+                    { path: "M 150 100 L 150 300", num: { x: 135, y: 115, text: "2" }, checkpoints: [{ x: 150, y: 100 }, { x: 150, y: 300 }] }
                 ]
             },
             {
                 char: 'U',
-                rewards: [{ word: "Umbrella", fallback: "☂️" }, { word: "Unicorn", fallback: "🦄" }, { word: "UFO", fallback: "🛸" }],
+                rewards: [{ word: "Umbrella", kor: "우산", fallback: "☂️" }, { word: "Unicorn", kor: "유니콘", fallback: "🦄" }, { word: "UFO", kor: "유에프오", fallback: "🛸" }],
                 strokes: [
-                    { path: "M 90 70 L 90 200 C 90 280 210 280 210 200 L 210 70", num: { x: 70, y: 70, text: "1" }, checkpoints: [{ x: 90, y: 70 }, { x: 90, y: 200 }, { x: 150, y: 270 }, { x: 210, y: 200 }, { x: 210, y: 70 }] }
+                    { path: "M 90 100 L 90 230 C 90 310 210 310 210 230 L 210 100", num: { x: 70, y: 100, text: "1" }, checkpoints: [{ x: 90, y: 100 }, { x: 90, y: 230 }, { x: 150, y: 300 }, { x: 210, y: 230 }, { x: 210, y: 100 }] }
                 ]
             },
             {
                 char: 'V',
-                rewards: [{ word: "Violin", fallback: "🎻" }, { word: "Van", fallback: "🚐" }, { word: "Volcano", fallback: "🌋" }],
+                rewards: [{ word: "Violin", kor: "바이올린", fallback: "🎻" }, { word: "Van", kor: "승합차", fallback: "🚐" }, { word: "Volcano", kor: "화산", fallback: "🌋" }],
                 strokes: [
-                    { path: "M 80 70 L 150 270", num: { x: 65, y: 70, text: "1" }, checkpoints: [{ x: 80, y: 70 }, { x: 150, y: 270 }] },
-                    { path: "M 150 270 L 220 70", num: { x: 160, y: 285, text: "2" }, checkpoints: [{ x: 150, y: 270 }, { x: 220, y: 70 }] }
+                    { path: "M 80 100 L 150 300", num: { x: 65, y: 100, text: "1" }, checkpoints: [{ x: 80, y: 100 }, { x: 150, y: 300 }] },
+                    { path: "M 150 300 L 220 100", num: { x: 160, y: 315, text: "2" }, checkpoints: [{ x: 150, y: 300 }, { x: 220, y: 100 }] }
                 ]
             },
             {
                 char: 'W',
-                rewards: [{ word: "Watermelon", fallback: "🍉" }, { word: "Whale", fallback: "🐳" }, { word: "Watch", fallback: "⌚" }],
+                rewards: [{ word: "Watermelon", kor: "수박", fallback: "🍉" }, { word: "Whale", kor: "고래", fallback: "🐳" }, { word: "Watch", kor: "시계", fallback: "⌚" }],
                 strokes: [
-                    { path: "M 70 70 L 110 270", num: { x: 55, y: 70, text: "1" }, checkpoints: [{ x: 70, y: 70 }, { x: 110, y: 270 }] },
-                    { path: "M 110 270 L 150 140", num: { x: 110, y: 285, text: "2" }, checkpoints: [{ x: 110, y: 270 }, { x: 150, y: 140 }] },
-                    { path: "M 150 140 L 190 270", num: { x: 150, y: 125, text: "3" }, checkpoints: [{ x: 150, y: 140 }, { x: 190, y: 270 }] },
-                    { path: "M 190 270 L 230 70", num: { x: 190, y: 285, text: "4" }, checkpoints: [{ x: 190, y: 270 }, { x: 230, y: 70 }] }
+                    { path: "M 70 100 L 110 300", num: { x: 55, y: 100, text: "1" }, checkpoints: [{ x: 70, y: 100 }, { x: 110, y: 300 }] },
+                    { path: "M 110 300 L 150 170", num: { x: 110, y: 315, text: "2" }, checkpoints: [{ x: 110, y: 300 }, { x: 150, y: 170 }] },
+                    { path: "M 150 170 L 190 300", num: { x: 150, y: 155, text: "3" }, checkpoints: [{ x: 150, y: 170 }, { x: 190, y: 300 }] },
+                    { path: "M 190 300 L 230 100", num: { x: 190, y: 315, text: "4" }, checkpoints: [{ x: 190, y: 300 }, { x: 230, y: 100 }] }
                 ]
             },
             {
                 char: 'X',
-                rewards: [{ word: "Xylophone", fallback: "🪗" }, { word: "X-ray", fallback: "🩻" }, { word: "Xmas tree", fallback: "🎄" }],
+                rewards: [{ word: "Xylophone", kor: "실로폰", fallback: "🪗" }, { word: "X-ray", kor: "엑스레이", fallback: "🩻" }, { word: "Xmas tree", kor: "트리", fallback: "🎄" }],
                 strokes: [
-                    { path: "M 80 70 L 220 270", num: { x: 65, y: 70, text: "1" }, checkpoints: [{ x: 80, y: 70 }, { x: 220, y: 270 }] },
-                    { path: "M 220 70 L 80 270", num: { x: 235, y: 70, text: "2" }, checkpoints: [{ x: 220, y: 70 }, { x: 80, y: 270 }] }
+                    { path: "M 80 100 L 220 300", num: { x: 65, y: 100, text: "1" }, checkpoints: [{ x: 80, y: 100 }, { x: 220, y: 300 }] },
+                    { path: "M 220 100 L 80 300", num: { x: 235, y: 100, text: "2" }, checkpoints: [{ x: 220, y: 100 }, { x: 80, y: 300 }] }
                 ]
             },
             {
                 char: 'Y',
-                rewards: [{ word: "Yacht", fallback: "🛥️" }, { word: "Yo-yo", fallback: "🪀" }, { word: "Yellow", fallback: "💛" }],
+                rewards: [{ word: "Yacht", kor: "요트", fallback: "🛥️" }, { word: "Yo-yo", kor: "요요", fallback: "🪀" }, { word: "Yellow", kor: "노란색", fallback: "💛" }],
                 strokes: [
-                    { path: "M 80 70 L 150 170", num: { x: 65, y: 70, text: "1" }, checkpoints: [{ x: 80, y: 70 }, { x: 150, y: 170 }] },
-                    { path: "M 220 70 L 150 170", num: { x: 235, y: 70, text: "2" }, checkpoints: [{ x: 220, y: 70 }, { x: 150, y: 170 }] },
-                    { path: "M 150 170 L 150 270", num: { x: 135, y: 180, text: "3" }, checkpoints: [{ x: 150, y: 170 }, { x: 150, y: 270 }] }
+                    { path: "M 80 100 L 150 200", num: { x: 65, y: 100, text: "1" }, checkpoints: [{ x: 80, y: 100 }, { x: 150, y: 200 }] },
+                    { path: "M 220 100 L 150 200", num: { x: 235, y: 100, text: "2" }, checkpoints: [{ x: 220, y: 100 }, { x: 150, y: 200 }] },
+                    { path: "M 150 200 L 150 300", num: { x: 135, y: 210, text: "3" }, checkpoints: [{ x: 150, y: 200 }, { x: 150, y: 300 }] }
                 ]
             },
             {
                 char: 'Z',
-                rewards: [{ word: "Zebra", fallback: "🦓" }, { word: "Zipper", fallback: "🤐" }, { word: "Zoo", fallback: "🦁" }],
+                rewards: [{ word: "Zebra", kor: "얼룩말", fallback: "🦓" }, { word: "Zipper", kor: "지퍼", fallback: "🤐" }, { word: "Zoo", kor: "동물원", fallback: "🦁" }],
                 strokes: [
-                    { path: "M 80 70 L 220 70 L 80 270 L 220 270", num: { x: 65, y: 70, text: "1" }, checkpoints: [{ x: 80, y: 70 }, { x: 220, y: 70 }, { x: 80, y: 270 }, { x: 220, y: 270 }] }
+                    { path: "M 80 100 L 220 100 L 80 300 L 220 300", num: { x: 65, y: 100, text: "1" }, checkpoints: [{ x: 80, y: 100 }, { x: 220, y: 100 }, { x: 80, y: 300 }, { x: 220, y: 300 }] }
                 ]
             }
         ];
@@ -520,9 +529,9 @@
         let isDrawing = false;
         let currentStrokeIndex = 0;
         let strokePassedCheckpoints = [];
-        let isCompletingStroke = false; // 중복 획순 진행 방지 잠금 플래그
+        let isCompletingStroke = false;
 
-        // 🔊 브라우저 TTS (원어민 발음 재생)
+        // 🔊 브라우저 TTS (영어 및 한글 음성 재생 지원)
         function speak(text, lang = 'en-US') {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -584,7 +593,7 @@
             updateGuides();
 
             // 알파벳 선택 시 발음
-            speak(char);
+            speak(char, 'en-US');
         }
 
         function updateGuides() {
@@ -686,7 +695,7 @@
             if (dist < 65) {
                 strokePassedCheckpoints[nextIndex] = true;
                 if (strokePassedCheckpoints.every(p => p === true)) {
-                    isCompletingStroke = true; // 중복 콜백 차단
+                    isCompletingStroke = true;
                     completeStroke();
                 }
             }
@@ -713,6 +722,7 @@
             const reward = data.rewards[Math.floor(Math.random() * data.rewards.length)];
 
             rewardWordEl.innerText = reward.word;
+            rewardKorEl.innerText = reward.kor;
             rewardVisualEl.innerHTML = `<span class="reward-emoji">${reward.fallback}</span>`;
 
             successOverlay.classList.add('show');
@@ -720,10 +730,13 @@
             const existingNums = document.querySelectorAll('.stroke-number');
             existingNums.forEach(e => e.remove());
 
-            // 완성 효과음 및 단어 원어민 발음 재생
+            // 완성 효과음 및 [영어 단어 -> 한글 뜻] 순서로 음성 재생
             playSuccessSound();
             setTimeout(() => {
-                speak(reward.word);
+                speak(reward.word, 'en-US');
+                setTimeout(() => {
+                    speak(reward.kor, 'ko-KR');
+                }, 1100);
             }, 300);
         }
 
