@@ -115,13 +115,13 @@
 
         /* 버튼 기본 스타일 */
         .btn {
-            width: 48px;
-            height: 48px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
             border: 3px solid white;
             background-color: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            font-size: 22px;
+            font-size: 26px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -295,20 +295,16 @@
             .right-menu {
                 flex-direction: column;
                 width: 100%;
-                padding: 8px 12px;
+                padding: 12px 12px;
                 border-radius: 20px;
-                gap: 6px;
+                gap: 12px;
             }
 
             .right-menu .btn {
-                width: 42px;
-                height: 42px;
-                font-size: 18px;
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
                 border-width: 2px;
-            }
-
-            .right-menu .menu-column:first-child .btn {
-                font-size: 11px;
             }
         }
 
@@ -368,22 +364,22 @@
                 <defs>
                     <mask id="nail-hole">
                         <rect width="450" height="550" fill="white" />
-                        <path d="M 125 110 C 125 45, 325 45, 325 110 L 310 380 C 310 415, 140 415, 140 380 Z"
+                        <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z"
                             fill="black" />
                     </mask>
                 </defs>
 
                 <g mask="url(#nail-hole)">
                     <rect width="450" height="550" fill="#f3edf5" />
-                    <path d="M 60 550 C 70 420, 85 240, 85 115 C 85 20, 365 20, 365 115 C 365 240, 380 420, 390 550 Z"
+                    <path d="M 35 550 C 45 420, 60 240, 60 115 C 60 20, 390 20, 390 115 C 390 240, 405 420, 415 550 Z"
                         fill="#fbc5b1" stroke="#e09985" stroke-width="2.5" />
                 </g>
 
-                <path d="M 140 380 C 140 415, 310 415, 310 380" fill="none" stroke="#d18671" stroke-width="3"
+                <path d="M 115 380 C 115 415, 335 415, 335 380" fill="none" stroke="#d18671" stroke-width="3"
                     stroke-linecap="round" />
-                <path d="M 95 460 C 150 475, 300 475, 355 460" fill="none" stroke="#e09985" stroke-width="2"
+                <path d="M 70 460 C 125 475, 325 475, 380 460" fill="none" stroke="#e09985" stroke-width="2"
                     stroke-linecap="round" opacity="0.8" />
-                <path d="M 105 475 C 160 488, 290 488, 345 475" fill="none" stroke="#e09985" stroke-width="1.5"
+                <path d="M 80 475 C 135 488, 315 488, 370 475" fill="none" stroke="#e09985" stroke-width="1.5"
                     stroke-linecap="round" opacity="0.7" />
             </svg>
         </div>
@@ -429,6 +425,16 @@
             <div class="menu-column">
                 <span class="column-title">💅 바탕 매니큐어 (옆으로 밀어보세요 👉)</span>
                 <div class="color-row">
+                    <button class="btn" style="background: linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff);"
+                        onclick="fillPattern('rainbow')">🌈</button>
+                    <button class="btn" style="background: radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px;"
+                        onclick="fillPattern('dots')">🔮</button>
+                    <button class="btn"
+                        style="background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 15px, #fecfef 15px, #fecfef 30px);"
+                        onclick="fillPattern('stripes')">🍬</button>
+                    <button class="btn"
+                        style="background: radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 0 0 / 20px 20px, radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 10px 10px / 20px 20px #a29bfe;"
+                        onclick="fillPattern('stars')">✨</button>
                     <button class="btn" style="background: #e84393;" onclick="fillPattern('color', '#e84393')"></button>
                     <button class="btn" style="background: #ff80ab;" onclick="fillPattern('color', '#ff80ab')"></button>
                     <button class="btn" style="background: #ffbe76;" onclick="fillPattern('color', '#ffbe76')"></button>
@@ -437,11 +443,7 @@
                     <button class="btn" style="background: #74b9ff;" onclick="fillPattern('color', '#74b9ff')"></button>
                     <button class="btn" style="background: #9b59b6;" onclick="fillPattern('color', '#9b59b6')"></button>
                     <button class="btn" style="background: #f1f2f6;" onclick="fillPattern('color', '#f1f2f6')"></button>
-                    <button class="btn" style="background: linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff);"
-                        onclick="fillPattern('rainbow')">🌈</button>
-                    <button class="btn" style="background: radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px;"
-                        onclick="fillPattern('dots')">🔮</button>
-                    <button class="btn" style="background: #fff; font-weight:bold; font-size:14px;"
+                    <button class="btn" style="background: #fff; font-weight:bold; font-size:16px;"
                         onclick="fillPattern('clear')">지움</button>
                 </div>
             </div>
@@ -573,7 +575,11 @@
             } else if (type === 'rainbow') {
                 nailBg.style.background = 'linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff)';
             } else if (type === 'dots') {
-                nailBg.style.background = 'radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 12px 12px';
+                nailBg.style.background = 'radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px';
+            } else if (type === 'stripes') {
+                nailBg.style.background = 'repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 15px, #fecfef 15px, #fecfef 30px)';
+            } else if (type === 'stars') {
+                nailBg.style.background = 'radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 0 0 / 20px 20px, radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 10px 10px / 20px 20px #a29bfe';
             } else if (type === 'clear') {
                 nailBg.style.background = 'radial-gradient(circle, #ffffff, #f7d6e0)';
             }
@@ -587,15 +593,41 @@
         function startDrag(e, sticker) {
             if (dragGhost) return;
 
-            // 스크롤과 충돌하지 않도록 즉시 드래그를 막지 않습니다.
             potentialSticker = sticker;
             isDraggingSticker = false;
             initialPointerX = e.clientX;
             initialPointerY = e.clientY;
 
+            // PC 마우스 환경은 스크롤(스와이프)과 겹치지 않으므로 즉시 드래그 시작
+            if (e.pointerType === 'mouse') {
+                startActualDrag(e);
+                window.addEventListener('pointerup', onDrop, { once: true });
+                return;
+            }
+
+            // 모바일 터치 환경은 스크롤과 충돌하지 않도록 움직임 모니터링
             window.addEventListener('pointermove', checkDragIntent, { passive: false });
             window.addEventListener('pointerup', cancelDragIntent, { once: true });
             window.addEventListener('pointercancel', cancelDragIntent, { once: true });
+        }
+
+        function startActualDrag(e) {
+            isDraggingSticker = true;
+            if (e.cancelable !== false) e.preventDefault();
+
+            draggedSticker = potentialSticker;
+            dragGhost = document.createElement('div');
+            dragGhost.className = 'drag-ghost';
+            dragGhost.innerText = draggedSticker;
+
+            const size = getEmojiSize();
+            dragGhost.style.fontSize = `${size}px`;
+            dragGhost.style.left = `${e.clientX}px`;
+            dragGhost.style.top = `${e.clientY}px`;
+            document.body.appendChild(dragGhost);
+
+            window.removeEventListener('pointermove', checkDragIntent);
+            window.addEventListener('pointermove', onDrag, { passive: false });
         }
 
         function checkDragIntent(e) {
@@ -607,22 +639,7 @@
             if (!isDraggingSticker) {
                 // 위/아래(도화지 방향)로 움직일 때만 드래그 시작
                 if (dy > 8 && dy > dx) {
-                    isDraggingSticker = true;
-                    e.preventDefault();
-
-                    draggedSticker = potentialSticker;
-                    dragGhost = document.createElement('div');
-                    dragGhost.className = 'drag-ghost';
-                    dragGhost.innerText = draggedSticker;
-
-                    const size = getEmojiSize();
-                    dragGhost.style.fontSize = `${size}px`;
-                    dragGhost.style.left = `${e.clientX}px`;
-                    dragGhost.style.top = `${e.clientY}px`;
-                    document.body.appendChild(dragGhost);
-
-                    window.removeEventListener('pointermove', checkDragIntent);
-                    window.addEventListener('pointermove', onDrag, { passive: false });
+                    startActualDrag(e);
                     window.addEventListener('pointerup', onDrop, { once: true });
                 } else if (dx > 8 && dx >= dy) {
                     // 양옆으로 밀면 스크롤이므로 드래그 대기 취소
