@@ -128,7 +128,6 @@
             justify-content: center;
             transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
             flex-shrink: 0;
-            touch-action: none;
         }
 
         .btn.active {
@@ -367,14 +366,37 @@
                         <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z"
                             fill="black" />
                     </mask>
+                    <clipPath id="nail-clip">
+                        <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" />
+                    </clipPath>
+                    <filter id="blur-glow">
+                        <feGaussianBlur stdDeviation="4" />
+                    </filter>
+                    <filter id="blur-shadow">
+                        <feGaussianBlur stdDeviation="6" />
+                    </filter>
                 </defs>
 
+                <!-- 손가락 몸통 (마스크 바깥 영역) -->
                 <g mask="url(#nail-hole)">
                     <rect width="450" height="550" fill="#f3edf5" />
-                    <path d="M 35 550 C 45 420, 60 240, 60 115 C 60 20, 390 20, 390 115 C 390 240, 405 420, 415 550 Z"
+                    <path d="M 0 550 C 20 420, 50 240, 60 115 C 60 20, 390 20, 390 115 C 400 240, 430 420, 450 550 Z"
                         fill="#fbc5b1" stroke="#e09985" stroke-width="2.5" />
                 </g>
 
+                <!-- 💎 3D 네일 광택 & 그림자 효과 (클립 마스크 시용하여 손톱 영역에만 비치게) -->
+                <g clip-path="url(#nail-clip)">
+                    <!-- 깊이감 그림자 (오른쪽 아래) -->
+                    <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" fill="none"
+                        stroke="black" stroke-width="25" filter="url(#blur-shadow)" opacity="0.35"
+                        transform="translate(10, 10)" />
+                    <!-- 밝은 광택 하이라이트 (왼쪽 위) -->
+                    <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" fill="none"
+                        stroke="white" stroke-width="20" filter="url(#blur-glow)" opacity="0.95"
+                        transform="translate(-8, -8)" />
+                </g>
+
+                <!-- 손가락 주름 부분 -->
                 <path d="M 115 380 C 115 415, 335 415, 335 380" fill="none" stroke="#d18671" stroke-width="3"
                     stroke-linecap="round" />
                 <path d="M 70 460 C 125 475, 325 475, 380 460" fill="none" stroke="#e09985" stroke-width="2"
@@ -435,6 +457,9 @@
                     <button class="btn"
                         style="background: radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 0 0 / 20px 20px, radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 10px 10px / 20px 20px #a29bfe;"
                         onclick="fillPattern('stars')">✨</button>
+                    <button class="btn"
+                        style="background: conic-gradient(#ffeaa7 90deg, #ff7675 90deg 180deg, #ffeaa7 180deg 270deg, #ff7675 270deg) 0 0 / 20px 20px;"
+                        onclick="fillPattern('checkers')">🏁</button>
                     <button class="btn" style="background: #e84393;" onclick="fillPattern('color', '#e84393')"></button>
                     <button class="btn" style="background: #ff80ab;" onclick="fillPattern('color', '#ff80ab')"></button>
                     <button class="btn" style="background: #ffbe76;" onclick="fillPattern('color', '#ffbe76')"></button>
@@ -453,6 +478,11 @@
                 <span class="column-title">✨ 귀여운 스티커 (옆으로 밀어보세요 👉)</span>
                 <div class="sticker-slider-container">
                     <div class="sticker-slider">
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍎')">🍎</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍑')">🍑</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐬')">🐬</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐙')">🐙</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌷')">🌷</div>
                         <div class="btn sticker-item" onpointerdown="startDrag(event, '🧸')">🧸</div>
                         <div class="btn sticker-item" onpointerdown="startDrag(event, '🐥')">🐥</div>
                         <div class="btn sticker-item" onpointerdown="startDrag(event, '💖')">💖</div>
@@ -580,6 +610,8 @@
                 nailBg.style.background = 'repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 15px, #fecfef 15px, #fecfef 30px)';
             } else if (type === 'stars') {
                 nailBg.style.background = 'radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 0 0 / 20px 20px, radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 10px 10px / 20px 20px #a29bfe';
+            } else if (type === 'checkers') {
+                nailBg.style.background = 'conic-gradient(#ffeaa7 90deg, #ff7675 90deg 180deg, #ffeaa7 180deg 270deg, #ff7675 270deg) 0 0 / 30px 30px';
             } else if (type === 'clear') {
                 nailBg.style.background = 'radial-gradient(circle, #ffffff, #f7d6e0)';
             }
