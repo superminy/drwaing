@@ -258,9 +258,9 @@
     <div class="game-card">
         <!-- 모드 선택 -->
         <div class="mode-tabs">
-            <button class="tab-btn active" onclick="setMode('add')">➕ 더하기</button>
-            <button class="tab-btn" onclick="setMode('sub')">➖ 빼기</button>
-            <button class="tab-btn" onclick="setMode('mix')">🎲 섞어서</button>
+            <button class="tab-btn active" onclick="setMode('add', this)">➕ 더하기</button>
+            <button class="tab-btn" onclick="setMode('sub', this)">➖ 빼기</button>
+            <button class="tab-btn" onclick="setMode('mix', this)">🎲 섞어서</button>
         </div>
 
         <!-- 스탬프 점수 -->
@@ -295,10 +295,21 @@
         let score = 0;
         let currentEmoji = '🍎';
 
-        // 효과음 재생 (Web Audio API)
+        // 단일 AudioContext 재사용으로 메모리 누수 방지
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
         function playSound(type) {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const ctx = getAudioContext();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
@@ -330,10 +341,10 @@
             } catch (e) { }
         }
 
-        function setMode(mode) {
+        function setMode(mode, btnEl) {
             currentMode = mode;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (btnEl) btnEl.classList.add('active');
             generateQuestion();
         }
 
@@ -370,7 +381,6 @@
             container.innerHTML = '';
 
             if (currentOp === '+') {
-                // 더하기 시각화
                 const group1 = document.createElement('div');
                 group1.className = 'emoji-group';
                 for (let i = 0; i < num1; i++) {
@@ -393,7 +403,6 @@
                 container.appendChild(op);
                 container.appendChild(group2);
             } else {
-                // 빼기 시각화 (터치 시 팡! 하고 그레이스케일 처리)
                 const group = document.createElement('div');
                 group.className = 'emoji-group';
                 for (let i = 0; i < num1; i++) {
@@ -425,12 +434,27 @@
             grid.innerHTML = '';
 
             let choices = [answer];
-            while (choices.length < 4) {
-                let wrong = answer + (Math.floor(Math.random() * 5) - 2);
+            let attempts = 0;
+
+            // 무한 루프 방지를 위한 안전 장치가 포함된 선택지 생성
+            while (choices.length < 4 && attempts < 100) {
+                attempts++;
+                let offset = Math.floor(Math.random() * 7) - 3; // -3 ~ +3 범위
+                let wrong = answer + offset;
                 if (wrong > 0 && wrong !== answer && !choices.includes(wrong)) {
                     choices.push(wrong);
                 }
             }
+
+            // 혹시 4개가 안 채워진 경우 순차적으로 보완
+            let fallback = 1;
+            while (choices.length < 4) {
+                if (!choices.includes(fallback) && fallback !== answer) {
+                    choices.push(fallback);
+                }
+                fallback++;
+            }
+
             choices.sort(() => Math.random() - 0.5);
 
             choices.forEach(val => {
