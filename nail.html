@@ -238,18 +238,18 @@
         /* 📱 모바일 최적화 레이아웃 */
         @media (max-width: 768px) {
             body {
-                justify-content: space-between;
-                padding: 6px 10px;
+                justify-content: center;
+                padding: 10px 10px;
             }
 
             h2 {
-                font-size: 19px;
-                margin: 0 0 2px 0;
+                font-size: 20px;
+                margin: 0 0 4px 0;
             }
 
             .game-container {
                 flex-direction: column;
-                gap: 8px;
+                gap: 4px;
                 width: 100%;
                 max-width: 420px;
             }
@@ -257,28 +257,28 @@
             .left-menu {
                 flex-direction: row;
                 width: 100%;
-                justify-content: space-between;
+                justify-content: center;
                 align-items: center;
-                gap: 6px;
+                gap: 8px;
             }
 
             .left-menu .btn {
-                width: 42px;
-                height: 42px;
-                font-size: 18px;
+                width: 46px;
+                height: 46px;
+                font-size: 19px;
             }
 
             .slider-box {
                 flex-direction: row;
-                height: 42px;
+                height: 46px;
                 padding: 0 10px;
-                border-radius: 21px;
-                gap: 6px;
+                border-radius: 23px;
+                gap: 8px;
             }
 
             .size-slider {
                 writing-mode: horizontal-tb;
-                width: 70px;
+                width: 80px;
                 height: 10px;
                 direction: ltr;
             }
@@ -402,15 +402,21 @@
 
             <!-- 🎨 바탕 매니큐어 색상 -->
             <div class="menu-column">
-                <span class="column-title">💅 바탕 매니큐어</span>
+                <span class="column-title">💅 바탕 매니큐어 (옆으로 밀어보세요 👉)</span>
                 <div class="color-row">
                     <button class="btn" style="background: #e84393;" onclick="fillPattern('color', '#e84393')"></button>
+                    <button class="btn" style="background: #ff80ab;" onclick="fillPattern('color', '#ff80ab')"></button>
+                    <button class="btn" style="background: #ffbe76;" onclick="fillPattern('color', '#ffbe76')"></button>
+                    <button class="btn" style="background: #ffeaa7;" onclick="fillPattern('color', '#ffeaa7')"></button>
+                    <button class="btn" style="background: #81ecec;" onclick="fillPattern('color', '#81ecec')"></button>
+                    <button class="btn" style="background: #74b9ff;" onclick="fillPattern('color', '#74b9ff')"></button>
                     <button class="btn" style="background: #9b59b6;" onclick="fillPattern('color', '#9b59b6')"></button>
+                    <button class="btn" style="background: #f1f2f6;" onclick="fillPattern('color', '#f1f2f6')"></button>
                     <button class="btn" style="background: linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff);"
                         onclick="fillPattern('rainbow')">🌈</button>
                     <button class="btn" style="background: radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px;"
                         onclick="fillPattern('dots')">🔮</button>
-                    <button class="btn" style="background: #fff; font-weight:bold;"
+                    <button class="btn" style="background: #fff; font-weight:bold; font-size:14px;"
                         onclick="fillPattern('clear')">지움</button>
                 </div>
             </div>
