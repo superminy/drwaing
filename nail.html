@@ -497,6 +497,10 @@
 
         let dragGhost = null;
         let draggedSticker = '';
+        let initialPointerX = 0;
+        let initialPointerY = 0;
+        let potentialSticker = null;
+        let isDraggingSticker = false;
 
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -583,25 +587,54 @@
         function startDrag(e, sticker) {
             if (dragGhost) return;
 
-            e.preventDefault();
-            e.stopPropagation();
+            // 스크롤과 충돌하지 않도록 즉시 드래그를 막지 않습니다.
+            potentialSticker = sticker;
+            isDraggingSticker = false;
+            initialPointerX = e.clientX;
+            initialPointerY = e.clientY;
 
-            draggedSticker = sticker;
+            window.addEventListener('pointermove', checkDragIntent, { passive: false });
+            window.addEventListener('pointerup', cancelDragIntent, { once: true });
+            window.addEventListener('pointercancel', cancelDragIntent, { once: true });
+        }
 
-            dragGhost = document.createElement('div');
-            dragGhost.className = 'drag-ghost';
-            dragGhost.innerText = sticker;
+        function checkDragIntent(e) {
+            if (!potentialSticker) return;
 
-            const size = getEmojiSize();
-            dragGhost.style.fontSize = `${size}px`;
-            dragGhost.style.left = `${e.clientX}px`;
-            dragGhost.style.top = `${e.clientY}px`;
+            let dx = Math.abs(e.clientX - initialPointerX);
+            let dy = Math.abs(e.clientY - initialPointerY);
 
-            document.body.appendChild(dragGhost);
+            if (!isDraggingSticker) {
+                // 위/아래(도화지 방향)로 움직일 때만 드래그 시작
+                if (dy > 8 && dy > dx) {
+                    isDraggingSticker = true;
+                    e.preventDefault();
 
-            window.addEventListener('pointermove', onDrag, { passive: false });
-            window.addEventListener('pointerup', onDrop, { once: true });
-            window.addEventListener('pointercancel', onDrop, { once: true });
+                    draggedSticker = potentialSticker;
+                    dragGhost = document.createElement('div');
+                    dragGhost.className = 'drag-ghost';
+                    dragGhost.innerText = draggedSticker;
+
+                    const size = getEmojiSize();
+                    dragGhost.style.fontSize = `${size}px`;
+                    dragGhost.style.left = `${e.clientX}px`;
+                    dragGhost.style.top = `${e.clientY}px`;
+                    document.body.appendChild(dragGhost);
+
+                    window.removeEventListener('pointermove', checkDragIntent);
+                    window.addEventListener('pointermove', onDrag, { passive: false });
+                    window.addEventListener('pointerup', onDrop, { once: true });
+                } else if (dx > 8 && dx >= dy) {
+                    // 양옆으로 밀면 스크롤이므로 드래그 대기 취소
+                    cancelDragIntent();
+                }
+            }
+        }
+
+        function cancelDragIntent() {
+            potentialSticker = null;
+            isDraggingSticker = false;
+            window.removeEventListener('pointermove', checkDragIntent);
         }
 
         function onDrag(e) {
