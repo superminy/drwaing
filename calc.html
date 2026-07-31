@@ -101,7 +101,7 @@
 
         /* Question Header */
         .question-text {
-            font-size: 30px;
+            font-size: 28px;
             font-weight: bold;
             color: #2d3436;
             margin: 2px 0;
@@ -550,9 +550,15 @@
 
         // 화면 텍스트들을 선택된 표기 방식에 맞춰 즉시 갱신
         function updateUIByFormat() {
-            // 1. 문제 텍스트
-            const str1 = formatNum(num1);
-            const str2 = formatNum(num2);
+            // 1. 문제 텍스트 (한자어/순우리말 선택 시 계산식에도 괄호 안 아라비아 숫자 표기)
+            let str1 = formatNum(num1);
+            let str2 = formatNum(num2);
+
+            if (numFormat !== 'digit') {
+                str1 = `${str1}(${num1})`;
+                str2 = `${str2}(${num2})`;
+            }
+
             document.getElementById('questionText').innerText = `${str1} ${currentOp} ${str2} = ?`;
 
             // 2. 가이드 메시지
@@ -620,7 +626,7 @@
         function renderChoices() {
             const grid = document.getElementById('choicesGrid');
             
-            // 이전에 사용자가 틀려서 비활성화된 보기 상태를 보존할 수도 있음
+            // 이전에 사용자가 틀려서 비활성화된 보기 상태를 보존
             const existingDisabledValues = new Set();
             grid.querySelectorAll('.wrong-choice').forEach(btn => {
                 if (btn.dataset.val) existingDisabledValues.add(parseInt(btn.dataset.val));
