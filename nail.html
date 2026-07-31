@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>반짝반짝 리얼 네일아트 놀이</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            text-align: center;
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #ffeaa7, #ffc0cb);
+            margin: 0;
+            padding: 8px;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            margin: 4px 0 8px 0;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+            font-size: 22px;
+        }
+
+        .game-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .left-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .right-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 14px;
+            border-radius: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            width: 290px;
+            flex-shrink: 0;
+        }
+
+        .menu-column {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .column-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 2px;
+            text-align: left;
+        }
+
+        .sticker-slider-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sticker-slider {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 4px 2px;
+            touch-action: pan-x;
+        }
+
+        .sticker-slider::-webkit-scrollbar,
+        .color-row::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .sticker-slider::-webkit-scrollbar-thumb,
+        .color-row::-webkit-scrollbar-thumb {
+            background: rgba(232, 67, 147, 0.3);
+            border-radius: 10px;
+        }
+
+        .color-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 2px;
+            touch-action: pan-x;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 버튼 기본 스타일 */
+        .btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid white;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            flex-shrink: 0;
+            touch-action: none;
+        }
+
+        .btn.active {
+            border-color: #e84393;
+            transform: scale(1.08);
+            background-color: #fff0f6;
+        }
+
+        /* 연필 색상 버튼 스타일 */
+        .pen-color-btn {
+            border: 2px solid white;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+            scroll-snap-align: start;
+        }
+
+        .pen-color-btn.selected {
+            border: 3px solid #e84393;
+            transform: scale(1.15);
+            box-shadow: 0 0 10px rgba(232, 67, 147, 0.5);
+        }
+
+        .sticker-item {
+            scroll-snap-align: start;
+            cursor: grab;
+            font-size: 24px;
+        }
+
+        .drag-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            user-select: none;
+            will-change: left, top;
+        }
+
+        .slider-box {
+            background: white;
+            padding: 8px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .slider-box span {
+            font-size: 11px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .size-slider {
+            width: 15px;
+            height: 90px;
+            writing-mode: vertical-lr;
+            direction: rtl;
+            accent-color: #e84393;
+            cursor: pointer;
+        }
+
+        /* 중앙 도화지 판 */
+        .artboard {
+            position: relative;
+            width: 420px;
+            height: 510px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            flex-shrink: 0;
+            touch-action: none;
+        }
+
+        #nailBackground {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #ffffff, #f7d6e0);
+            transition: background 0.25s ease;
+        }
+
+        #paintCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            touch-action: none;
+        }
+
+        .finger-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* 📱 모바일 최적화 레이아웃 */
+        @media (max-width: 768px) {
+            body {
+                justify-content: space-between;
+                padding: 6px 10px;
+            }
+
+            h2 {
+                font-size: 19px;
+                margin: 0 0 2px 0;
+            }
+
+            .game-container {
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+                max-width: 420px;
+            }
+
+            .left-menu {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .left-menu .btn {
+                width: 42px;
+                height: 42px;
+                font-size: 18px;
+            }
+
+            .slider-box {
+                flex-direction: row;
+                height: 42px;
+                padding: 0 10px;
+                border-radius: 21px;
+                gap: 6px;
+            }
+
+            .size-slider {
+                writing-mode: horizontal-tb;
+                width: 70px;
+                height: 10px;
+                direction: ltr;
+            }
+
+            .artboard {
+                width: 100%;
+                max-width: 350px;
+                height: auto;
+                aspect-ratio: 450 / 550;
+                border-radius: 22px;
+                margin: 0 auto;
+            }
+
+            .right-menu {
+                flex-direction: column;
+                width: 100%;
+                padding: 8px 12px;
+                border-radius: 20px;
+                gap: 6px;
+            }
+
+            .right-menu .btn {
+                width: 42px;
+                height: 42px;
+                font-size: 18px;
+                border-width: 2px;
+            }
+
+            .right-menu .menu-column:first-child .btn {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>💅 반짝반짝 모바일 네일 숍</h2>
+
+    <div class="game-container">
+        <!-- 상단 기능 툴바 -->
+        <div class="left-menu">
+            <button class="btn" style="background-color: #ff7675; color: white; font-size: 16px;"
+                onclick="undo()">↩️</button>
+            <button class="btn" style="background-color: #ffeaa7;" onclick="clearAll()">🗑️</button>
+            <button id="tool-pen" class="btn active" onclick="setMode('pen')">✏️</button>
+            <button id="tool-eraser" class="btn" onclick="setMode('eraser')">🧼</button>
+
+            <div class="slider-box">
+                <span>굵기</span>
+                <input type="range" id="penSize" class="size-slider" min="2" max="35" value="6"
+                    oninput="updateSize(this.value)">
+            </div>
+        </div>
+
+        <!-- 중앙 손톱 캔버스 아틀리에 -->
+        <div class="artboard">
+            <div id="nailBackground"></div>
+            <canvas id="paintCanvas" width="450" height="550"></canvas>
+
+            <svg class="finger-overlay" viewBox="0 0 450 550">
+                <defs>
+                    <mask id="nail-hole">
+                        <rect width="450" height="550" fill="white" />
+                        <path d="M 125 110 C 125 45, 325 45, 325 110 L 310 380 C 310 415, 140 415, 140 380 Z"
+                            fill="black" />
+                    </mask>
+                </defs>
+
+                <g mask="url(#nail-hole)">
+                    <rect width="450" height="550" fill="#f3edf5" />
+                    <path d="M 60 550 C 70 420, 85 240, 85 115 C 85 20, 365 20, 365 115 C 365 240, 380 420, 390 550 Z"
+                        fill="#fbc5b1" stroke="#e09985" stroke-width="2.5" />
+                </g>
+
+                <path d="M 140 380 C 140 415, 310 415, 310 380" fill="none" stroke="#d18671" stroke-width="3"
+                    stroke-linecap="round" />
+                <path d="M 95 460 C 150 475, 300 475, 355 460" fill="none" stroke="#e09985" stroke-width="2"
+                    stroke-linecap="round" opacity="0.8" />
+                <path d="M 105 475 C 160 488, 290 488, 345 475" fill="none" stroke="#e09985" stroke-width="1.5"
+                    stroke-linecap="round" opacity="0.7" />
+            </svg>
+        </div>
+
+        <!-- 하단 꾸미기 바 -->
+        <div class="right-menu">
+            <!-- ✏️ 연필 색상 팔레트 (밝은 계열 대폭 추가) -->
+            <div class="menu-column">
+                <span class="column-title">✏️ 연필 색상 (옆으로 밀어보세요 👉)</span>
+                <div class="color-row">
+                    <button class="btn pen-color-btn selected" style="background: #e84393;"
+                        onclick="setPenColor('#e84393', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ff80ab;"
+                        onclick="setPenColor('#ff80ab', this)"></button> <!-- 딸기우유 핑크 -->
+                    <button class="btn pen-color-btn" style="background: #ff7675;"
+                        onclick="setPenColor('#ff7675', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ffbe76;"
+                        onclick="setPenColor('#ffbe76', this)"></button> <!-- 피치 코랄 -->
+                    <button class="btn pen-color-btn" style="background: #ffeaa7;"
+                        onclick="setPenColor('#ffeaa7', this)"></button> <!-- 레몬 yellow -->
+                    <button class="btn pen-color-btn" style="background: #fdcb6e;"
+                        onclick="setPenColor('#fdcb6e', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #b8e994;"
+                        onclick="setPenColor('#b8e994', this)"></button> <!-- 연연두 -->
+                    <button class="btn pen-color-btn" style="background: #55efc4;"
+                        onclick="setPenColor('#55efc4', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #81ecec;"
+                        onclick="setPenColor('#81ecec', this)"></button> <!-- 아이스 민트 -->
+                    <button class="btn pen-color-btn" style="background: #74b9ff;"
+                        onclick="setPenColor('#74b9ff', this)"></button> <!-- 파스텔 하늘 -->
+                    <button class="btn pen-color-btn" style="background: #a29bfe;"
+                        onclick="setPenColor('#a29bfe', this)"></button> <!-- 라벤더 -->
+                    <button class="btn pen-color-btn" style="background: #6c5ce7;"
+                        onclick="setPenColor('#6c5ce7', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #2d3436;"
+                        onclick="setPenColor('#2d3436', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ffffff; border: 2px solid #ddd;"
+                        onclick="setPenColor('#ffffff', this)"></button>
+                </div>
+            </div>
+
+            <!-- 🎨 바탕 매니큐어 색상 -->
+            <div class="menu-column">
+                <span class="column-title">💅 바탕 매니큐어</span>
+                <div class="color-row">
+                    <button class="btn" style="background: #e84393;" onclick="fillPattern('color', '#e84393')"></button>
+                    <button class="btn" style="background: #9b59b6;" onclick="fillPattern('color', '#9b59b6')"></button>
+                    <button class="btn" style="background: linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff);"
+                        onclick="fillPattern('rainbow')">🌈</button>
+                    <button class="btn" style="background: radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px;"
+                        onclick="fillPattern('dots')">🔮</button>
+                    <button class="btn" style="background: #fff; font-weight:bold;"
+                        onclick="fillPattern('clear')">지움</button>
+                </div>
+            </div>
+
+            <!-- ⭐ 스티커 -->
+            <div class="menu-column">
+                <span class="column-title">✨ 귀여운 스티커 (옆으로 밀어보세요 👉)</span>
+                <div class="sticker-slider-container">
+                    <div class="sticker-slider">
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🧸')">🧸</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐥')">🐥</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '💖')">💖</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🎀')">🎀</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌸')">🌸</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍓')">🍓</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍭')">🍭</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍦')">🍦</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍩')">🍩</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍪')">🍪</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '⭐')">⭐</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '💎')">💎</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '👑')">👑</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🦄')">🦄</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍒')">🍒</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐰')">🐰</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐼')">🐼</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐱')">🐱</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🦋')">🦋</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🎈')">🎈</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '✨')">✨</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌙')">🌙</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐾')">🐾</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🧁')">🧁</div>
+                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌼')">🌼</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const sizeInput = document.getElementById('penSize');
+        const nailBg = document.getElementById('nailBackground');
+
+        let isDrawing = false;
+        let currentMode = 'pen';
+        let currentColor = '#e84393';
+
+        let undoStack = [];
+        const maxUndo = 15;
+
+        let dragGhost = null;
+        let draggedSticker = '';
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = sizeInput.value;
+        ctx.strokeStyle = currentColor;
+
+        function getCanvasCoords(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        function getEmojiSize() {
+            return parseInt(sizeInput.value) * 1.5 + 34;
+        }
+
+        function saveState() {
+            if (undoStack.length >= maxUndo) undoStack.shift();
+            undoStack.push(canvas.toDataURL());
+        }
+
+        function undo() {
+            if (undoStack.length === 0) return;
+            let previousState = undoStack.pop();
+            let img = new Image();
+            img.src = previousState;
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('tool-pen').classList.remove('active');
+            document.getElementById('tool-eraser').classList.remove('active');
+
+            if (mode === 'pen') {
+                document.getElementById('tool-pen').classList.add('active');
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = sizeInput.value;
+            } else if (mode === 'eraser') {
+                document.getElementById('tool-eraser').classList.add('active');
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = Math.max(parseInt(sizeInput.value) * 2.5, 20);
+            }
+        }
+
+        function setPenColor(color, btnEl) {
+            currentColor = color;
+            setMode('pen');
+            document.querySelectorAll('.pen-color-btn').forEach(btn => btn.classList.remove('selected'));
+            if (btnEl) btnEl.classList.add('selected');
+        }
+
+        function updateSize(value) {
+            if (currentMode === 'pen') {
+                ctx.lineWidth = value;
+            } else {
+                ctx.lineWidth = Math.max(parseInt(value) * 2.5, 20);
+            }
+        }
+
+        function fillPattern(type, arg = '') {
+            if (type === 'color') {
+                nailBg.style.background = arg;
+            } else if (type === 'rainbow') {
+                nailBg.style.background = 'linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff)';
+            } else if (type === 'dots') {
+                nailBg.style.background = 'radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 12px 12px';
+            } else if (type === 'clear') {
+                nailBg.style.background = 'radial-gradient(circle, #ffffff, #f7d6e0)';
+            }
+        }
+
+        function clearAll() {
+            saveState();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function startDrag(e, sticker) {
+            if (dragGhost) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            draggedSticker = sticker;
+
+            dragGhost = document.createElement('div');
+            dragGhost.className = 'drag-ghost';
+            dragGhost.innerText = sticker;
+
+            const size = getEmojiSize();
+            dragGhost.style.fontSize = `${size}px`;
+            dragGhost.style.left = `${e.clientX}px`;
+            dragGhost.style.top = `${e.clientY}px`;
+
+            document.body.appendChild(dragGhost);
+
+            window.addEventListener('pointermove', onDrag, { passive: false });
+            window.addEventListener('pointerup', onDrop, { once: true });
+            window.addEventListener('pointercancel', onDrop, { once: true });
+        }
+
+        function onDrag(e) {
+            if (!dragGhost) return;
+            e.preventDefault();
+            dragGhost.style.left = `${e.clientX}px`;
+            dragGhost.style.top = `${e.clientY}px`;
+        }
+
+        function onDrop(e) {
+            if (!dragGhost) return;
+
+            window.removeEventListener('pointermove', onDrag);
+
+            const rect = canvas.getBoundingClientRect();
+
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+
+                const coords = getCanvasCoords(e.clientX, e.clientY);
+
+                saveState();
+                ctx.globalCompositeOperation = 'source-over';
+
+                const size = getEmojiSize();
+                ctx.font = `${size}px 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(draggedSticker, coords.x, coords.y);
+            }
+
+            if (dragGhost.parentNode) {
+                dragGhost.parentNode.removeChild(dragGhost);
+            }
+            dragGhost = null;
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            saveState();
+            isDrawing = true;
+            ctx.beginPath();
+            const coords = getCanvasCoords(e.clientX, e.clientY);
+            ctx.moveTo(coords.x, coords.y);
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const coords = getCanvasCoords(e.clientX, e.clientY);
+            ctx.lineTo(coords.x, coords.y);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('pointerup', () => isDrawing = false);
+        canvas.addEventListener('pointerleave', () => isDrawing = false);
+        canvas.addEventListener('pointercancel', () => isDrawing = false);
+    </script>
+</body>
+
+</html>
