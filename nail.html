@@ -311,10 +311,35 @@
                 font-size: 11px;
             }
         }
+
+        .home-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .home-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 
 <body>
+    <a href="index.html" class="home-btn">🏠 홈으로</a>
 
     <h2>💅 반짝반짝 모바일 네일 숍</h2>
 
