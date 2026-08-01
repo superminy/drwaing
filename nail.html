@@ -10,196 +10,145 @@
             box-sizing: border-box;
         }
 
-        body {
-            text-align: center;
+        html, body {
+            width: 100%;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* S25 화면에서 페이지 전체 스크롤 완전 차단 */
             font-family: 'Malgun Gothic', sans-serif;
             background: linear-gradient(135deg, #ffeaa7, #ffc0cb);
-            margin: 0;
-            padding: 8px;
             user-select: none;
             -webkit-user-select: none;
-            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
+        }
+
+        /* 상단 헤더 */
+        .header-bar {
+            width: 100%;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            overflow-x: hidden;
+            position: relative;
+            padding: 8px 12px 2px 12px;
+            flex-shrink: 0;
         }
 
         h2 {
-            margin: 4px 0 8px 0;
+            margin: 0;
             color: #fff;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
-            font-size: 22px;
+            font-size: 19px;
+            white-space: nowrap;
         }
 
-        .game-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            max-width: 1000px;
-            width: 100%;
-        }
-
-        .left-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            flex-shrink: 0;
-        }
-
-        .right-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 14px;
-            border-radius: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            width: 290px;
-            flex-shrink: 0;
-        }
-
-        .menu-column {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 100%;
-        }
-
-        .column-title {
+        .home-btn {
+            position: absolute;
+            left: 12px;
+            background: white;
+            border: none;
+            border-radius: 16px;
+            padding: 6px 10px;
             font-size: 13px;
             font-weight: bold;
             color: #555;
-            margin-bottom: 2px;
-            text-align: left;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .sticker-slider-container {
+        /* 메인 게임 컨테이너 (S25 화면 폭 400px 내외에 맞춤) */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
             width: 100%;
+            max-width: 430px;
+            height: calc(100dvh - 36px);
+            padding: 4px 10px 10px 10px;
+            gap: 6px;
             overflow: hidden;
-            position: relative;
         }
 
-        .sticker-slider {
+        /* 1. 상단 툴바 */
+        .left-menu {
             display: flex;
+            flex-direction: row;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
             gap: 8px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            padding: 4px 2px;
-            touch-action: pan-x;
+            flex-shrink: 0;
         }
 
-        .sticker-slider::-webkit-scrollbar,
-        .color-row::-webkit-scrollbar {
-            height: 4px;
-        }
-
-        .sticker-slider::-webkit-scrollbar-thumb,
-        .color-row::-webkit-scrollbar-thumb {
-            background: rgba(232, 67, 147, 0.3);
-            border-radius: 10px;
-        }
-
-        .color-row {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 4px 2px;
-            touch-action: pan-x;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* 버튼 기본 스타일 */
         .btn {
-            width: 54px;
-            height: 54px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             border: 3px solid white;
             background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            font-size: 26px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+            font-size: 24px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.15s ease;
             flex-shrink: 0;
         }
 
         .btn.active {
             border-color: #e84393;
-            transform: scale(1.08);
+            transform: scale(1.06);
             background-color: #fff0f6;
-        }
-
-        /* 연필 색상 버튼 스타일 */
-        .pen-color-btn {
-            border: 2px solid white;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-            scroll-snap-align: start;
-        }
-
-        .pen-color-btn.selected {
-            border: 3px solid #e84393;
-            transform: scale(1.15);
-            box-shadow: 0 0 10px rgba(232, 67, 147, 0.5);
-        }
-
-        .sticker-item {
-            scroll-snap-align: start;
-            cursor: grab;
-            font-size: 24px;
-        }
-
-        .drag-ghost {
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            user-select: none;
-            will-change: left, top;
         }
 
         .slider-box {
             background: white;
-            padding: 8px;
-            border-radius: 20px;
+            padding: 0 10px;
+            height: 52px;
+            border-radius: 26px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
         }
 
         .slider-box span {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             color: #555;
+            white-space: nowrap;
         }
 
         .size-slider {
-            width: 15px;
-            height: 90px;
-            writing-mode: vertical-lr;
-            direction: rtl;
+            width: 80px;
+            height: 16px;
             accent-color: #e84393;
             cursor: pointer;
         }
 
-        /* 중앙 도화지 판 */
+        /* 2. 중앙 손톱 캔버스 (S25 화면 높이에 따라 자동 반응) */
         .artboard {
             position: relative;
-            width: 420px;
-            height: 510px;
-            border-radius: 30px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 350px;
+            flex: 1;
+            max-height: 48dvh;
+            aspect-ratio: 450 / 550;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            flex-shrink: 0;
+            flex-shrink: 1;
             touch-action: none;
+            margin: 0 auto;
         }
 
         #nailBackground {
@@ -234,127 +183,140 @@
             pointer-events: none;
         }
 
-        /* 📱 모바일 최적화 레이아웃 */
-        @media (max-width: 768px) {
-            body {
-                justify-content: center;
-                padding: 10px 10px;
-            }
-
-            h2 {
-                font-size: 20px;
-                margin: 0 0 4px 0;
-            }
-
-            .game-container {
-                flex-direction: column;
-                gap: 4px;
-                width: 100%;
-                max-width: 420px;
-            }
-
-            .left-menu {
-                flex-direction: row;
-                width: 100%;
-                justify-content: center;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .left-menu .btn {
-                width: 46px;
-                height: 46px;
-                font-size: 19px;
-            }
-
-            .slider-box {
-                flex-direction: row;
-                height: 46px;
-                padding: 0 10px;
-                border-radius: 23px;
-                gap: 8px;
-            }
-
-            .size-slider {
-                writing-mode: horizontal-tb;
-                width: 80px;
-                height: 10px;
-                direction: ltr;
-            }
-
-            .artboard {
-                width: 100%;
-                max-width: 350px;
-                height: auto;
-                aspect-ratio: 450 / 550;
-                border-radius: 22px;
-                margin: 0 auto;
-            }
-
-            .right-menu {
-                flex-direction: column;
-                width: 100%;
-                padding: 12px 12px;
-                border-radius: 20px;
-                gap: 12px;
-            }
-
-            .right-menu .btn {
-                width: 52px;
-                height: 52px;
-                font-size: 24px;
-                border-width: 2px;
-            }
+        /* 3. 하단 메뉴 패널 */
+        .right-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 10px 12px;
+            border-radius: 22px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            flex-shrink: 0;
         }
 
-        .home-btn {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            background: white;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 16px;
-            font-size: 16px;
+        .menu-column {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .column-title {
+            font-size: 12px;
             font-weight: bold;
             color: #555;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
+            text-align: left;
+            padding-left: 2px;
         }
 
-        .home-btn:active {
-            transform: scale(0.95);
+        .color-row, .sticker-slider {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 2px;
+            touch-action: pan-x;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .color-row::-webkit-scrollbar, .sticker-slider::-webkit-scrollbar {
+            display: none; /* 모바일에서 깔끔하게 스크롤바 숨김 */
+        }
+
+        .right-menu .btn {
+            width: 54px;
+            height: 54px;
+            font-size: 26px;
+            border-width: 3px;
+            scroll-snap-align: start;
+        }
+
+        .pen-color-btn.selected {
+            border: 4px solid #e84393;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(232, 67, 147, 0.5);
+        }
+
+        .sticker-item {
+            cursor: grab;
+        }
+
+        .drag-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            user-select: none;
+            will-change: left, top;
+        }
+
+        /* PC / 대형 화면 분기 처리 */
+        @media (min-width: 769px) {
+            html, body {
+                justify-content: center;
+                padding: 10px;
+            }
+            .header-bar {
+                max-width: 900px;
+            }
+            .game-container {
+                flex-direction: row;
+                max-width: 900px;
+                height: 560px;
+                gap: 16px;
+            }
+            .left-menu {
+                flex-direction: column;
+                width: auto;
+            }
+            .slider-box {
+                flex-direction: column;
+                height: auto;
+                padding: 10px;
+                border-radius: 20px;
+            }
+            .size-slider {
+                writing-mode: vertical-lr;
+                direction: rtl;
+                width: 16px;
+                height: 90px;
+            }
+            .artboard {
+                height: 100%;
+                max-height: none;
+            }
+            .right-menu {
+                width: 300px;
+                height: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 
 <body>
-    <a href="index.html" class="home-btn">🏠 홈으로</a>
-
-    <h2>💅 반짝반짝 모바일 네일 숍</h2>
+    <div class="header-bar">
+        <a href="index.html" class="home-btn">🏠 홈</a>
+        <h2>💅 반짝반짝 모바일 네일 숍</h2>
+    </div>
 
     <div class="game-container">
-        <!-- 상단 기능 툴바 -->
+        <!-- 1. 상단 기능 툴바 -->
         <div class="left-menu">
-            <button class="btn" style="background-color: #ff7675; color: white; font-size: 16px;"
-                onclick="undo()">↩️</button>
+            <button class="btn" style="background-color: #ff7675; color: white; font-size: 16px;" onclick="undo()">↩️</button>
             <button class="btn" style="background-color: #ffeaa7;" onclick="clearAll()">🗑️</button>
             <button id="tool-pen" class="btn active" onclick="setMode('pen')">✏️</button>
             <button id="tool-eraser" class="btn" onclick="setMode('eraser')">🧼</button>
 
             <div class="slider-box">
                 <span>굵기</span>
-                <input type="range" id="penSize" class="size-slider" min="2" max="35" value="6"
-                    oninput="updateSize(this.value)">
+                <input type="range" id="penSize" class="size-slider" min="2" max="35" value="6" oninput="updateSize(this.value)">
             </div>
         </div>
 
-        <!-- 중앙 손톱 캔버스 아틀리에 -->
+        <!-- 2. 중앙 손톱 캔버스 -->
         <div class="artboard">
             <div id="nailBackground"></div>
             <canvas id="paintCanvas" width="450" height="550"></canvas>
@@ -363,8 +325,7 @@
                 <defs>
                     <mask id="nail-hole">
                         <rect width="450" height="550" fill="white" />
-                        <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z"
-                            fill="black" />
+                        <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" fill="black" />
                     </mask>
                     <clipPath id="nail-clip">
                         <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" />
@@ -377,138 +338,83 @@
                     </filter>
                 </defs>
 
-                <!-- 손가락 몸통 (마스크 바깥 영역) -->
+                <!-- 손가락 피부 -->
                 <g mask="url(#nail-hole)">
                     <rect width="450" height="550" fill="#f3edf5" />
-                    <path d="M 0 550 C 20 420, 50 240, 60 115 C 60 20, 390 20, 390 115 C 400 240, 430 420, 450 550 Z"
-                        fill="#fbc5b1" stroke="#e09985" stroke-width="2.5" />
+                    <path d="M 0 550 C 20 420, 50 240, 60 115 C 60 20, 390 20, 390 115 C 400 240, 430 420, 450 550 Z" fill="#fbc5b1" stroke="#e09985" stroke-width="2.5" />
                 </g>
 
-                <!-- 💎 3D 네일 광택 & 그림자 효과 (클립 마스크 시용하여 손톱 영역에만 비치게) -->
+                <!-- 3D 손톱 그림자 & 하이라이트 -->
                 <g clip-path="url(#nail-clip)">
-                    <!-- 깊이감 그림자 (오른쪽 아래) -->
-                    <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" fill="none"
-                        stroke="black" stroke-width="25" filter="url(#blur-shadow)" opacity="0.35"
-                        transform="translate(10, 10)" />
-                    <!-- 밝은 광택 하이라이트 (왼쪽 위) -->
-                    <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" fill="none"
-                        stroke="white" stroke-width="20" filter="url(#blur-glow)" opacity="0.95"
-                        transform="translate(-8, -8)" />
+                    <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" fill="none" stroke="black" stroke-width="25" filter="url(#blur-shadow)" opacity="0.35" transform="translate(10, 10)" />
+                    <path d="M 100 110 C 100 45, 350 45, 350 110 L 335 380 C 335 415, 115 415, 115 380 Z" fill="none" stroke="white" stroke-width="20" filter="url(#blur-glow)" opacity="0.95" transform="translate(-8, -8)" />
                 </g>
 
-                <!-- 손가락 주름 부분 -->
-                <path d="M 115 380 C 115 415, 335 415, 335 380" fill="none" stroke="#d18671" stroke-width="3"
-                    stroke-linecap="round" />
-                <path d="M 70 460 C 125 475, 325 475, 380 460" fill="none" stroke="#e09985" stroke-width="2"
-                    stroke-linecap="round" opacity="0.8" />
-                <path d="M 80 475 C 135 488, 315 488, 370 475" fill="none" stroke="#e09985" stroke-width="1.5"
-                    stroke-linecap="round" opacity="0.7" />
+                <!-- 손가락 주름 -->
+                <path d="M 115 380 C 115 415, 335 415, 335 380" fill="none" stroke="#d18671" stroke-width="3" stroke-linecap="round" />
+                <path d="M 70 460 C 125 475, 325 475, 380 460" fill="none" stroke="#e09985" stroke-width="2" stroke-linecap="round" opacity="0.8" />
             </svg>
         </div>
 
-        <!-- 하단 꾸미기 바 -->
+        <!-- 3. 하단 메뉴 바 -->
         <div class="right-menu">
-            <!-- ✏️ 연필 색상 팔레트 (밝은 계열 대폭 추가) -->
+            <!-- ✏️ 연필 색상 -->
             <div class="menu-column">
-                <span class="column-title">✏️ 연필 색상 (옆으로 밀어보세요 👉)</span>
+                <span class="column-title">✏️ 연필 색상 (👉 옆으로 스크롤)</span>
                 <div class="color-row">
-                    <button class="btn pen-color-btn selected" style="background: #e84393;"
-                        onclick="setPenColor('#e84393', this)"></button>
-                    <button class="btn pen-color-btn" style="background: #ff80ab;"
-                        onclick="setPenColor('#ff80ab', this)"></button> <!-- 딸기우유 핑크 -->
-                    <button class="btn pen-color-btn" style="background: #ff7675;"
-                        onclick="setPenColor('#ff7675', this)"></button>
-                    <button class="btn pen-color-btn" style="background: #ffbe76;"
-                        onclick="setPenColor('#ffbe76', this)"></button> <!-- 피치 코랄 -->
-                    <button class="btn pen-color-btn" style="background: #ffeaa7;"
-                        onclick="setPenColor('#ffeaa7', this)"></button> <!-- 레몬 yellow -->
-                    <button class="btn pen-color-btn" style="background: #fdcb6e;"
-                        onclick="setPenColor('#fdcb6e', this)"></button>
-                    <button class="btn pen-color-btn" style="background: #b8e994;"
-                        onclick="setPenColor('#b8e994', this)"></button> <!-- 연연두 -->
-                    <button class="btn pen-color-btn" style="background: #55efc4;"
-                        onclick="setPenColor('#55efc4', this)"></button>
-                    <button class="btn pen-color-btn" style="background: #81ecec;"
-                        onclick="setPenColor('#81ecec', this)"></button> <!-- 아이스 민트 -->
-                    <button class="btn pen-color-btn" style="background: #74b9ff;"
-                        onclick="setPenColor('#74b9ff', this)"></button> <!-- 파스텔 하늘 -->
-                    <button class="btn pen-color-btn" style="background: #a29bfe;"
-                        onclick="setPenColor('#a29bfe', this)"></button> <!-- 라벤더 -->
-                    <button class="btn pen-color-btn" style="background: #6c5ce7;"
-                        onclick="setPenColor('#6c5ce7', this)"></button>
-                    <button class="btn pen-color-btn" style="background: #2d3436;"
-                        onclick="setPenColor('#2d3436', this)"></button>
-                    <button class="btn pen-color-btn" style="background: #ffffff; border: 2px solid #ddd;"
-                        onclick="setPenColor('#ffffff', this)"></button>
+                    <button class="btn pen-color-btn selected" style="background: #e84393;" onclick="setPenColor('#e84393', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ff80ab;" onclick="setPenColor('#ff80ab', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ff7675;" onclick="setPenColor('#ff7675', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ffbe76;" onclick="setPenColor('#ffbe76', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ffeaa7;" onclick="setPenColor('#ffeaa7', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #b8e994;" onclick="setPenColor('#b8e994', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #55efc4;" onclick="setPenColor('#55efc4', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #81ecec;" onclick="setPenColor('#81ecec', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #74b9ff;" onclick="setPenColor('#74b9ff', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #a29bfe;" onclick="setPenColor('#a29bfe', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #2d3436;" onclick="setPenColor('#2d3436', this)"></button>
+                    <button class="btn pen-color-btn" style="background: #ffffff; border: 3px solid #ddd;" onclick="setPenColor('#ffffff', this)"></button>
                 </div>
             </div>
 
-            <!-- 🎨 바탕 매니큐어 색상 -->
+            <!-- 💅 바탕 매니큐어 -->
             <div class="menu-column">
-                <span class="column-title">💅 바탕 매니큐어 (옆으로 밀어보세요 👉)</span>
+                <span class="column-title">💅 바탕 매니큐어</span>
                 <div class="color-row">
-                    <button class="btn" style="background: linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff);"
-                        onclick="fillPattern('rainbow')">🌈</button>
-                    <button class="btn" style="background: radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px;"
-                        onclick="fillPattern('dots')">🔮</button>
-                    <button class="btn"
-                        style="background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 15px, #fecfef 15px, #fecfef 30px);"
-                        onclick="fillPattern('stripes')">🍬</button>
-                    <button class="btn"
-                        style="background: radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 0 0 / 20px 20px, radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 10px 10px / 20px 20px #a29bfe;"
-                        onclick="fillPattern('stars')">✨</button>
-                    <button class="btn"
-                        style="background: conic-gradient(#ffeaa7 90deg, #ff7675 90deg 180deg, #ffeaa7 180deg 270deg, #ff7675 270deg) 0 0 / 20px 20px;"
-                        onclick="fillPattern('checkers')">🏁</button>
+                    <button class="btn" style="background: linear-gradient(to bottom, #ff7675, #ffeaa7, #74b9ff);" onclick="fillPattern('rainbow')">🌈</button>
+                    <button class="btn" style="background: radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px;" onclick="fillPattern('dots')">🔮</button>
+                    <button class="btn" style="background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 15px, #fecfef 15px, #fecfef 30px);" onclick="fillPattern('stripes')">🍬</button>
                     <button class="btn" style="background: #e84393;" onclick="fillPattern('color', '#e84393')"></button>
                     <button class="btn" style="background: #ff80ab;" onclick="fillPattern('color', '#ff80ab')"></button>
                     <button class="btn" style="background: #ffbe76;" onclick="fillPattern('color', '#ffbe76')"></button>
                     <button class="btn" style="background: #ffeaa7;" onclick="fillPattern('color', '#ffeaa7')"></button>
                     <button class="btn" style="background: #81ecec;" onclick="fillPattern('color', '#81ecec')"></button>
                     <button class="btn" style="background: #74b9ff;" onclick="fillPattern('color', '#74b9ff')"></button>
-                    <button class="btn" style="background: #9b59b6;" onclick="fillPattern('color', '#9b59b6')"></button>
-                    <button class="btn" style="background: #f1f2f6;" onclick="fillPattern('color', '#f1f2f6')"></button>
-                    <button class="btn" style="background: #fff; font-weight:bold; font-size:16px;"
-                        onclick="fillPattern('clear')">지움</button>
+                    <button class="btn" style="background: #fff; font-weight:bold; font-size:14px;" onclick="fillPattern('clear')">지움</button>
                 </div>
             </div>
 
             <!-- ⭐ 스티커 -->
             <div class="menu-column">
-                <span class="column-title">✨ 귀여운 스티커 (옆으로 밀어보세요 👉)</span>
-                <div class="sticker-slider-container">
-                    <div class="sticker-slider">
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍎')">🍎</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍑')">🍑</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐬')">🐬</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐙')">🐙</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌷')">🌷</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🧸')">🧸</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐥')">🐥</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '💖')">💖</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🎀')">🎀</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌸')">🌸</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍓')">🍓</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍭')">🍭</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍦')">🍦</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍩')">🍩</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍪')">🍪</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '⭐')">⭐</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '💎')">💎</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '👑')">👑</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🦄')">🦄</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🍒')">🍒</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐰')">🐰</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐼')">🐼</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐱')">🐱</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🦋')">🦋</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🎈')">🎈</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '✨')">✨</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌙')">🌙</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🐾')">🐾</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🧁')">🧁</div>
-                        <div class="btn sticker-item" onpointerdown="startDrag(event, '🌼')">🌼</div>
-                    </div>
+                <span class="column-title">✨ 귀여운 스티커</span>
+                <div class="sticker-slider">
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🍎')">🍎</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🍑')">🍑</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🐬')">🐬</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🌷')">🌷</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🧸')">🧸</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🐥')">🐥</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '💖')">💖</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🎀')">🎀</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🌸')">🌸</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🍓')">🍓</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🍭')">🍭</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🍦')">🍦</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '⭐')">⭐</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '💎')">💎</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '👑')">👑</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🦄')">🦄</div>
+                    <div class="btn sticker-item" onpointerdown="startDrag(event, '🐰')">🐰</div>
                 </div>
             </div>
         </div>
@@ -608,10 +514,6 @@
                 nailBg.style.background = 'radial-gradient(#fff 20%, #fd79a8 21%) 0 0 / 14px 14px';
             } else if (type === 'stripes') {
                 nailBg.style.background = 'repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 15px, #fecfef 15px, #fecfef 30px)';
-            } else if (type === 'stars') {
-                nailBg.style.background = 'radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 0 0 / 20px 20px, radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 20%) 10px 10px / 20px 20px #a29bfe';
-            } else if (type === 'checkers') {
-                nailBg.style.background = 'conic-gradient(#ffeaa7 90deg, #ff7675 90deg 180deg, #ffeaa7 180deg 270deg, #ff7675 270deg) 0 0 / 30px 30px';
             } else if (type === 'clear') {
                 nailBg.style.background = 'radial-gradient(circle, #ffffff, #f7d6e0)';
             }
@@ -630,14 +532,12 @@
             initialPointerX = e.clientX;
             initialPointerY = e.clientY;
 
-            // PC 마우스 환경은 스크롤(스와이프)과 겹치지 않으므로 즉시 드래그 시작
             if (e.pointerType === 'mouse') {
                 startActualDrag(e);
                 window.addEventListener('pointerup', onDrop, { once: true });
                 return;
             }
 
-            // 모바일 터치 환경은 스크롤과 충돌하지 않도록 움직임 모니터링
             window.addEventListener('pointermove', checkDragIntent, { passive: false });
             window.addEventListener('pointerup', cancelDragIntent, { once: true });
             window.addEventListener('pointercancel', cancelDragIntent, { once: true });
@@ -669,12 +569,10 @@
             let dy = Math.abs(e.clientY - initialPointerY);
 
             if (!isDraggingSticker) {
-                // 위/아래(도화지 방향)로 움직일 때만 드래그 시작
                 if (dy > 8 && dy > dx) {
                     startActualDrag(e);
                     window.addEventListener('pointerup', onDrop, { once: true });
                 } else if (dx > 8 && dx >= dy) {
-                    // 양옆으로 밀면 스크롤이므로 드래그 대기 취소
                     cancelDragIntent();
                 }
             }
