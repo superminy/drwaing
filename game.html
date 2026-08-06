@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>귀여운 이모지 반쪽 맞추기 게임 🧩</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #FFF5F5 0%, #E8F5E9 50%, #E3F2FD 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Header & Top Bar */
+        header {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            margin-bottom: 15px;
+            border: 2px solid #FFF0F5;
+        }
+
+        h1 {
+            font-size: 1.3rem;
+            color: #FF5722;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+        }
+
+        .status-badge {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .badge {
+            background: #FFF8E1;
+            color: #F57F17;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            border: 2px solid #FFE082;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .icon-btn {
+            background: #FFFFFF;
+            border: 2px solid #E0E0E0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Guide Message */
+        .guide-box {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            background: #FFFFFF;
+            padding: 10px 18px;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #4A148C;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            border: 2px dashed #D1C4E9;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+        }
+
+        /* Game Board Area */
+        .game-board {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            min-height: 380px;
+        }
+
+        .side-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 24px;
+            padding: 15px;
+            border: 3px solid #FFF;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 360px;
+        }
+
+        .side-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #555;
+            margin-bottom: 12px;
+            background: #FFF;
+            padding: 4px 14px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .cards-grid {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Half Cards Styling */
+        .half-card {
+            width: 75px;
+            height: 120px;
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid #E0E0E0;
+        }
+
+        .half-card:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        }
+
+        .half-card.selected {
+            border-color: #FF4081 !important;
+            background: #FFF0F5;
+            transform: scale(1.08) translateY(-6px);
+            box-shadow: 0 12px 24px rgba(255, 64, 129, 0.3);
+            z-index: 10;
+        }
+
+        .half-card.left-side {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            border-right: 3px dashed #FFCA28;
+        }
+
+        .half-card.right-side {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+            border-left: 3px dashed #FFCA28;
+        }
+
+        .half-card.matched {
+            visibility: hidden;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .half-card.wrong {
+            animation: shake 0.4s ease;
+            border-color: #FF5252 !important;
+            background: #FFEBEE;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Emoji Half Cut Container */
+        .emoji-wrapper {
+            width: 60px;
+            height: 110px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-text {
+            position: absolute;
+            font-size: 82px;
+            line-height: 1;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .left-side .emoji-text {
+            left: -2px;
+        }
+
+        .right-side .emoji-text {
+            right: -2px;
+        }
+
+        /* Matched Area (Completed Showcase) */
+        .matched-container {
+            width: 100%;
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 12px 18px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .matched-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #388E3C;
+        }
+
+        .matched-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            min-height: 50px;
+        }
+
+        .completed-card {
+            width: 110px;
+            height: 55px;
+            background: #FFF;
+            border-radius: 14px;
+            border: 2px solid #81C784;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.15);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.2); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #FFFFFF;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 30px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            transform: scale(0.7);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 5px solid #FFD54F;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-emoji {
+            font-size: 80px;
+            margin-bottom: 10px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            color: #E91E63;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #FF4081 0%, #FF80AB 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 64, 129, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        canvas#confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 101;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti"></canvas>
+
+    <header>
+        <h1>🧩 반쪽 맞추기</h1>
+        <div class="status-badge">
+            <div class="badge" id="stageBadge">⭐ 1단계</div>
+            <button class="icon-btn" id="soundBtn" title="소리 켜기/끄기">🔊</button>
+            <button class="icon-btn" id="restartBtn" title="다시 시작">🔄</button>
+        </div>
+    </header>
+
+    <div class="guide-box" id="guideBox">
+        👈 왼쪽 반쪽을 누르고, 👉 오른쪽 반쪽을 찾아보세요!
+    </div>
+
+    <div class="game-board">
+        <!-- Left Side Cards -->
+        <div class="side-container">
+            <div class="side-title">👈 왼쪽 조각</div>
+            <div class="cards-grid" id="leftGrid"></div>
+        </div>
+
+        <!-- Right Side Cards -->
+        <div class="side-container">
+            <div class="side-title">오른쪽 조각 👉</div>
+            <div class="cards-grid" id="rightGrid"></div>
+        </div>
+    </div>
+
+    <!-- Completed Matches Container -->
+    <div class="matched-container">
+        <div class="matched-title">✨ 완성된 그림 모음</div>
+        <div class="matched-grid" id="matchedGrid"></div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal-overlay" id="winModal">
+        <div class="modal-card">
+            <div class="modal-emoji" id="winEmoji">🎉</div>
+            <div class="modal-title">우와! 잘했어요!</div>
+            <div class="modal-subtitle" id="winSubtitle">모든 반쪽을 다 맞췄어요!</div>
+            <button class="btn" id="nextBtn" onclick="nextStage()">다음 단계로! 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        // Sound FX Synthesizer (Web Audio API)
+        let soundEnabled = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'select') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.08);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'match') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.07);
+                    osc.stop(now + idx * 0.07 + 0.25);
+                });
+            } else if (type === 'wrong') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(140, now + 0.2);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'win') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.25, now + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 0.4);
+                });
+            }
+        }
+
+        // Emoji Pool
+        const EMOJI_ITEMS = [
+            { id: 'bear', emoji: '🐻', name: '아기 곰' },
+            { id: 'rabbit', emoji: '🐰', name: '토끼' },
+            { id: 'cat', emoji: '🐱', name: '고양이' },
+            { id: 'dog', emoji: '🐶', name: '강아지' },
+            { id: 'lion', emoji: '🦁', name: '사자' },
+            { id: 'panda', emoji: '🐼', name: '판다' },
+            { id: 'frog', emoji: '🐸', name: '개구리' },
+            { id: 'unicorn', emoji: '🦄', name: '유니콘' },
+            { id: 'robot', emoji: '🤖', name: '로봇' },
+            { id: 'rocket', emoji: '🚀', name: '우주선' },
+            { id: 'apple', emoji: '🍎', name: '사과' },
+            { id: 'car', emoji: '🚗', name: '자동차' }
+        ];
+
+        let currentStage = 1;
+        let selectedLeft = null;
+        let selectedRight = null;
+        let remainingMatches = 0;
+        let activeStageEmojis = [];
+
+        function getPairCountForStage(stage) {
+            if (stage === 1) return 1;
+            if (stage === 2) return 2;
+            if (stage === 3) return 3;
+            if (stage <= 5) return 4;
+            if (stage <= 8) return 5;
+            return 6;
+        }
+
+        function initGame() {
+            selectedLeft = null;
+            selectedRight = null;
+            document.getElementById('stageBadge').innerText = `⭐ ${currentStage}단계`;
+            document.getElementById('matchedGrid').innerHTML = '';
+
+            const pairCount = getPairCountForStage(currentStage);
+            remainingMatches = pairCount;
+
+            const shuffledPool = [...EMOJI_ITEMS].sort(() => Math.random() - 0.5);
+            activeStageEmojis = shuffledPool.slice(0, pairCount);
+
+            const leftCards = [...activeStageEmojis].sort(() => Math.random() - 0.5);
+            const rightCards = [...activeStageEmojis].sort(() => Math.random() - 0.5);
+
+            renderGrid('leftGrid', leftCards, 'left');
+            renderGrid('rightGrid', rightCards, 'right');
+
+            updateGuide();
+        }
+
+        function renderGrid(containerId, items, side) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `half-card ${side}-side`;
+                card.dataset.id = item.id;
+                card.dataset.side = side;
+
+                card.innerHTML = `
+                    <div class="emoji-wrapper">
+                        <span class="emoji-text">${item.emoji}</span>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => handleCardClick(card, item));
+                container.appendChild(card);
+            });
+        }
+
+        function handleCardClick(card, item) {
+            initAudio();
+
+            if (card.classList.contains('matched')) return;
+
+            const side = card.dataset.side;
+
+            if (side === 'left') {
+                if (selectedLeft) selectedLeft.classList.remove('selected');
+                if (selectedLeft === card) {
+                    selectedLeft = null;
+                    return;
+                }
+                selectedLeft = card;
+                card.classList.add('selected');
+                playSound('select');
+            } else {
+                if (selectedRight) selectedRight.classList.remove('selected');
+                if (selectedRight === card) {
+                    selectedRight = null;
+                    return;
+                }
+                selectedRight = card;
+                card.classList.add('selected');
+                playSound('select');
+            }
+
+            if (selectedLeft && selectedRight) {
+                checkMatch();
+            } else {
+                updateGuide();
+            }
+        }
+
+        function checkMatch() {
+            const leftId = selectedLeft.dataset.id;
+            const rightId = selectedRight.dataset.id;
+
+            if (leftId === rightId) {
+                playSound('match');
+                const matchedItem = EMOJI_ITEMS.find(e => e.id === leftId);
+
+                const leftCard = selectedLeft;
+                const rightCard = selectedRight;
+
+                leftCard.classList.add('matched');
+                rightCard.classList.add('matched');
+
+                addCompletedCard(matchedItem.emoji);
+
+                selectedLeft = null;
+                selectedRight = null;
+
+                remainingMatches--;
+
+                if (remainingMatches === 0) {
+                    setTimeout(() => {
+                        triggerWin();
+                    }, 500);
+                } else {
+                    updateGuide('잘했어요! 다른 반쪽도 찾아볼까요? 👏');
+                }
+            } else {
+                playSound('wrong');
+                const leftCard = selectedLeft;
+                const rightCard = selectedRight;
+
+                leftCard.classList.add('wrong');
+                rightCard.classList.add('wrong');
+
+                setTimeout(() => {
+                    leftCard.classList.remove('wrong', 'selected');
+                    rightCard.classList.remove('wrong', 'selected');
+                }, 400);
+
+                selectedLeft = null;
+                selectedRight = null;
+
+                updateGuide('아쉬워요! 다시 알맞은 모양을 찾아봐요 😃');
+            }
+        }
+
+        function addCompletedCard(emoji) {
+            const grid = document.getElementById('matchedGrid');
+            const comp = document.createElement('div');
+            comp.className = 'completed-card';
+            comp.innerText = emoji;
+            grid.appendChild(comp);
+        }
+
+        function updateGuide(customText) {
+            const guide = document.getElementById('guideBox');
+            if (customText) {
+                guide.innerText = customText;
+                return;
+            }
+
+            if (!selectedLeft && !selectedRight) {
+                guide.innerText = '👈 왼쪽 조각 하나, 👉 오른쪽 조각 하나를 차례로 누르세요!';
+            } else if (selectedLeft && !selectedRight) {
+                guide.innerText = '👉 어울리는 오른쪽 반쪽 조각을 골라주세요!';
+            } else if (!selectedLeft && selectedRight) {
+                guide.innerText = '👈 어울리는 왼쪽 반쪽 조각을 골라주세요!';
+            }
+        }
+
+        function triggerWin() {
+            playSound('win');
+            launchConfetti();
+
+            const winModal = document.getElementById('winModal');
+            const winEmoji = document.getElementById('winEmoji');
+            const winSubtitle = document.getElementById('winSubtitle');
+
+            winEmoji.innerText = activeStageEmojis[Math.floor(Math.random() * activeStageEmojis.length)].emoji;
+            winSubtitle.innerText = `${currentStage}단계를 모두 완성했어요! 최고예요! ⭐`;
+
+            winModal.classList.add('active');
+        }
+
+        function nextStage() {
+            document.getElementById('winModal').classList.remove('active');
+            currentStage++;
+            initGame();
+        }
+
+        document.getElementById('soundBtn').addEventListener('click', (e) => {
+            soundEnabled = !soundEnabled;
+            e.target.innerText = soundEnabled ? '🔊' : '🔇';
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            initGame();
+        });
+
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#FF4081', '#FFEB3B', '#00E676', '#00E5FF', '#AA00FF'];
+
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.8) * 12,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 10 + 6,
+                    rotation: Math.random() * 360,
+                    vRot: (Math.random() - 0.5) * 10
+                });
+            }
+
+            let start = Date.now();
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const elapsed = Date.now() - start;
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.25;
+                    p.rotation += p.vRot;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (elapsed < 2000) {
+                    requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            render();
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
