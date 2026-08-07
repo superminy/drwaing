@@ -272,7 +272,6 @@
     </div>
 
     <script>
-        // 카드 아이콘 리스트 (8쌍 = 16장)
         const EMOJIS = ['🐶', '🐱', '🦁', '🐵', '🐰', '🦊', '🐼', '🐸'];
         
         let cards = [];
@@ -282,16 +281,28 @@
         let tries = 0;
         let matchedPairs = 0;
 
-        // 효과음 재생 (Web Audio API - 외부 파일 없이 자체 생성)
+        // AudioContext 단일 인스턴스 재사용
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // 효과음 재생
         function playSound(type) {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
+                const ctx = getAudioContext();
 
                 if (type === 'flip') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(400, ctx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
@@ -339,11 +350,9 @@
             document.getElementById('tries-count').innerText = tries;
             document.getElementById('pairs-left').innerText = EMOJIS.length;
 
-            // 8개 아이콘을 2개씩 복사 후 무작위 섞기 (Fisher-Yates)
             cards = [...EMOJIS, ...EMOJIS];
             cards.sort(() => Math.random() - 0.5);
 
-            // 카드 DOM 생성
             cards.forEach((emoji, index) => {
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
@@ -394,6 +403,8 @@
 
         // 짝이 맞았을 때
         function disableCards() {
+            lockBoard = true; // 매칭 처리 중 추가 클릭 방지
+
             firstCard.classList.add('matched');
             secondCard.classList.add('matched');
 
@@ -401,16 +412,15 @@
             document.getElementById('pairs-left').innerText = EMOJIS.length - matchedPairs;
 
             playSound('match');
-            resetBoard();
 
-            // 모두 맞췄을 때
-            if (matchedPairs === EMOJIS.length) {
-                setTimeout(() => {
+            setTimeout(() => {
+                resetBoard();
+                if (matchedPairs === EMOJIS.length) {
                     playSound('win');
                     document.getElementById('popup-desc').innerText = `총 ${tries}번 만에 모든 동물 짝을 찾았어요!`;
                     document.getElementById('success-popup').classList.add('show');
-                }, 500);
-            }
+                }
+            }, 300);
         }
 
         // 짝이 틀렸을 때 (다시 뒤집기)
@@ -430,7 +440,6 @@
             lockBoard = false;
         }
 
-        // 페이지 로드 시 바로 시작
         window.onload = initGame;
     </script>
 </body>
