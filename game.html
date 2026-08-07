@@ -549,7 +549,7 @@
         let remainingMatches = 0;
         let activeStageEmojis = [];
 
-        // 단계별 그림 쌍 개수 지정 (1단계부터 2쌍 이상 나오도록 수정)
+        // 단계별 그림 쌍 개수 (1단계부터 2쌍 이상 나오도록 설정)
         function getPairCountForStage(stage) {
             if (stage === 1) return 2; // 1단계: 2쌍 (카드 4장)
             if (stage === 2) return 3; // 2단계: 3쌍 (카드 6장)
@@ -726,11 +726,9 @@
             initGame();
         }
 
-        // 메인으로 버튼 이벤트
+        // 메인으로 버튼 클릭 시 index.html 페이지로 이동
         document.getElementById('homeBtn').addEventListener('click', () => {
-            currentStage = 1;
-            document.getElementById('winModal').classList.remove('active');
-            initGame();
+            window.location.href = 'index.html';
         });
 
         document.getElementById('soundBtn').addEventListener('click', (e) => {
