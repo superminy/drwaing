@@ -121,7 +121,7 @@
             position: relative;
             transform-style: preserve-3d;
             -webkit-transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s ease-in-out;
             cursor: pointer;
         }
 
@@ -132,7 +132,7 @@
 
         .card.matched {
             transform: rotateY(180deg) scale(0.95);
-            opacity: 0.7;
+            opacity: 0.85; /* 맞춘 후에도 동물이 잘 보이도록 투명도 조정 */
             cursor: default;
         }
 
@@ -149,16 +149,17 @@
             font-size: 2.8em;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
             border: 3px solid white;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
         }
 
-        /* 카드 뒷면 (숨겨졌을 때 - 물음표) */
+        /* 카드 뒷면 (물음표) */
         .card-back {
             background-color: var(--card-back-bg);
             box-shadow: inset 0 -6px 0 var(--card-back-shadow), 0 8px 15px rgba(0, 0, 0, 0.1);
             color: white;
             transform: rotateY(0deg);
-            -webkit-transform: rotateY(0deg);
-            z-index: 2;
+            opacity: 1;
+            visibility: visible;
         }
 
         .card-back::after {
@@ -167,24 +168,27 @@
             opacity: 0.8;
         }
 
-        /* 카드 앞면 (뒤집혔을 때 - 동물 이모지) */
+        /* 카드 앞면 (동물 그림) */
         .card-front {
             background-color: #ffffff;
             transform: rotateY(180deg);
             -webkit-transform: rotateY(180deg);
             border: 3px solid #e1bee7;
-            z-index: 1;
+            opacity: 0;
+            visibility: hidden;
         }
 
-        /* 3D 표현 구형 브라우저 보완 (뒤집히면 뒷면 안보이게 처리) */
+        /* 🚨 핵심 수정: 뒤집히거나 맞춘 상태에서는 물음표 면을 숨기고 동물 그림만 표시 */
         .card.flipped .card-back,
         .card.matched .card-back {
-            z-index: 1;
+            opacity: 0;
+            visibility: hidden;
         }
 
         .card.flipped .card-front,
         .card.matched .card-front {
-            z-index: 2;
+            opacity: 1;
+            visibility: visible;
         }
 
         /* 🎉 성공 축하 팝업 Overlay */
@@ -283,7 +287,7 @@
     <!-- 축하 팝업 -->
     <div class="popup-overlay" id="success-popup">
         <div class="popup-card">
-            <div style="font-size: 80px; margin-bottom: 10px;">🎉🏆🎉</div>
+            <div style="font-size: 80px; margin-bottom: 10px;">🎉🦄🎉</div>
             <h2>참 잘했어요!</h2>
             <p id="popup-desc">총 0번 만에 모두 맞추었어요!</p>
             <button class="popup-btn" onclick="initGame()">한 번 더 하기!</button>
@@ -291,7 +295,8 @@
     </div>
 
     <script>
-        const EMOJIS = ['🐶', '🐱', '🦁', '🐵', '🐰', '🦊', '🐼', '🐸'];
+        // 🦄 유니콘 추가 (총 8개 종류)
+        const EMOJIS = ['🐶', '🐱', '🦁', '🐵', '🐰', '🦊', '🦄', '🐸'];
         
         let cards = [];
         let firstCard = null;
@@ -376,7 +381,6 @@
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
                 cardEl.dataset.emoji = emoji;
-                cardEl.dataset.index = index;
 
                 cardEl.innerHTML = `
                     <div class="card-face card-back"></div>
