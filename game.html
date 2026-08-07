@@ -173,16 +173,13 @@
             align-items: center;
         }
 
-        /* Half Card Design (슬림하고 깔끔한 반쪽 비율) */
+        /* Half Card Frame */
         .half-card {
-            width: 48px;
-            height: 80px;
+            width: 54px;
+            height: 84px;
             background: #FFFFFF;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.07);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -235,11 +232,10 @@
             40%, 80% { transform: translateX(6px); }
         }
 
-        /* Precise Emoji Half Masking */
-        .emoji-wrapper {
-            width: 28px;
-            height: 60px;
-            overflow: hidden;
+        /* Precise Emoji Half Masking (clip-path 방식 적용) */
+        .emoji-container {
+            width: 100%;
+            height: 100%;
             position: relative;
             display: flex;
             align-items: center;
@@ -248,19 +244,23 @@
 
         .emoji-text {
             position: absolute;
-            font-size: 56px;
+            font-size: 52px;
             line-height: 1;
             top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
         }
 
+        /* 왼쪽 조각: 이모지의 왼쪽 반쪽을 카드 오른쪽 경계선에 맞춰 정렬 */
         .left-side .emoji-text {
-            left: 0;
+            right: -26px;
+            transform: translateY(-50%);
+            clip-path: inset(0 50% 0 0);
         }
 
+        /* 오른쪽 조각: 이모지의 오른쪽 반쪽을 카드 왼쪽 경계선에 맞춰 정렬 */
         .right-side .emoji-text {
-            right: 0;
+            left: -26px;
+            transform: translateY(-50%);
+            clip-path: inset(0 0 0 50%);
         }
 
         /* Matched Area */
@@ -406,7 +406,7 @@
     </header>
 
     <div class="guide-box" id="guideBox">
-        👈 왼쪽 조각 하나, 👉 오른쪽 조각 하나를 찾아 연결해보세요!
+        👈 왼쪽 조각 하나, 👉 오른쪽 조각 하나를 연결해봐요!
     </div>
 
     <div class="game-board">
@@ -519,7 +519,7 @@
             return arr;
         }
 
-        // 같은 위치(행)에 동일한 이모지가 놓이지 않도록 방지하는 셔플
+        // 같은 나란한 위치에 동일한 이모지가 놓이지 않도록 방지
         function generateAntiAlignedRightCards(leftCards) {
             if (leftCards.length <= 1) return [...leftCards];
 
@@ -541,7 +541,7 @@
             return rightCards;
         }
 
-        // 이모지 풀
+        // 이모지 데이터
         const EMOJI_ITEMS = [
             { id: 'bear', emoji: '🐻' },
             { id: 'rabbit', emoji: '🐰' },
@@ -603,7 +603,7 @@
                 card.dataset.side = side;
 
                 card.innerHTML = `
-                    <div class="emoji-wrapper">
+                    <div class="emoji-container">
                         <span class="emoji-text">${item.emoji}</span>
                     </div>
                 `;
@@ -739,7 +739,7 @@
             initGame();
         }
 
-        // 이벤트 리스너 (초기화 및 사운드)
+        // 이벤트 리스너
         document.getElementById('restartBtn').addEventListener('click', () => {
             initGame();
         });
@@ -804,7 +804,6 @@
             render();
         }
 
-        // 최초 게임 시작
         initGame();
     </script>
 </body>
