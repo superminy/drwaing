@@ -57,6 +57,7 @@
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .main-btn {
@@ -65,7 +66,7 @@
             padding: 6px 14px;
             border-radius: 30px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             border: none;
             display: flex;
             align-items: center;
@@ -73,6 +74,11 @@
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(255, 112, 67, 0.3);
             transition: all 0.2s ease;
+        }
+
+        .main-btn.reset-btn {
+            background: #7E57C2;
+            box-shadow: 0 4px 10px rgba(126, 87, 194, 0.3);
         }
 
         .main-btn:active {
@@ -173,17 +179,17 @@
             width: 100%;
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
             align-items: center;
         }
 
-        /* Half Cards Styling */
+        /* Half Cards Styling (슬림하게 비율 조절) */
         .half-card {
-            width: 75px;
-            height: 120px;
+            width: 58px;
+            height: 100px;
             background: #FFFFFF;
-            border-radius: 16px;
+            border-radius: 12px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.08);
             display: flex;
             align-items: center;
@@ -239,20 +245,19 @@
             40%, 80% { transform: translateX(8px); }
         }
 
-        /* Emoji Half Cut Container */
+        /* Emoji Half Cut Container (정확히 딱 반만 잘려서 보이도록 수정) */
         .emoji-wrapper {
-            width: 60px;
-            height: 110px;
+            width: 36px;
+            height: 80px;
             overflow: hidden;
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
         }
 
         .emoji-text {
             position: absolute;
-            font-size: 82px;
+            font-size: 72px;
             line-height: 1;
             top: 50%;
             transform: translateY(-50%);
@@ -260,11 +265,11 @@
         }
 
         .left-side .emoji-text {
-            left: -2px;
+            left: 0;
         }
 
         .right-side .emoji-text {
-            right: -2px;
+            right: 0;
         }
 
         /* Matched Area (Completed Showcase) */
@@ -296,15 +301,15 @@
         }
 
         .completed-card {
-            width: 110px;
-            height: 55px;
+            width: 90px;
+            height: 50px;
             background: #FFF;
             border-radius: 14px;
             border: 2px solid #81C784;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 38px;
+            font-size: 34px;
             box-shadow: 0 4px 10px rgba(76, 175, 80, 0.15);
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -414,9 +419,10 @@
         <h1>🧩 반쪽 맞추기</h1>
         <div class="status-badge">
             <button class="main-btn" id="homeBtn">🏠 메인으로</button>
+            <button class="main-btn reset-btn" id="resetAllBtn">↺ 처음부터</button>
             <div class="badge" id="stageBadge">⭐ 1단계</div>
             <button class="icon-btn" id="soundBtn" title="소리 켜기/끄기">🔊</button>
-            <button class="icon-btn" id="restartBtn" title="다시 시작">🔄</button>
+            <button class="icon-btn" id="restartBtn" title="현재 단계 다시시작">🔄</button>
         </div>
     </header>
 
@@ -527,6 +533,16 @@
             }
         }
 
+        // Fisher-Yates 셔플 알고리즘
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
         // Emoji Pool
         const EMOJI_ITEMS = [
             { id: 'bear', emoji: '🐻', name: '아기 곰' },
@@ -549,13 +565,12 @@
         let remainingMatches = 0;
         let activeStageEmojis = [];
 
-        // 단계별 그림 쌍 개수 (1단계부터 2쌍 이상 나오도록 설정)
         function getPairCountForStage(stage) {
-            if (stage === 1) return 2; // 1단계: 2쌍 (카드 4장)
-            if (stage === 2) return 3; // 2단계: 3쌍 (카드 6장)
-            if (stage === 3) return 4; // 3단계: 4쌍 (카드 8장)
-            if (stage <= 5) return 5;  // 4~5단계: 5쌍
-            return 6;                   // 6단계 이상: 6쌍
+            if (stage === 1) return 2;
+            if (stage === 2) return 3;
+            if (stage === 3) return 4;
+            if (stage <= 5) return 5;
+            return 6;
         }
 
         function initGame() {
@@ -567,11 +582,20 @@
             const pairCount = getPairCountForStage(currentStage);
             remainingMatches = pairCount;
 
-            const shuffledPool = [...EMOJI_ITEMS].sort(() => Math.random() - 0.5);
+            const shuffledPool = shuffleArray(EMOJI_ITEMS);
             activeStageEmojis = shuffledPool.slice(0, pairCount);
 
-            const leftCards = [...activeStageEmojis].sort(() => Math.random() - 0.5);
-            const rightCards = [...activeStageEmojis].sort(() => Math.random() - 0.5);
+            let leftCards = shuffleArray(activeStageEmojis);
+            let rightCards = shuffleArray(activeStageEmojis);
+
+            // 좌우 카드가 나란히 같은 순서로 놓이지 않도록 방지
+            if (pairCount > 1) {
+                let attempts = 0;
+                while (leftCards.every((item, idx) => item.id === rightCards[idx].id) && attempts < 10) {
+                    rightCards = shuffleArray(activeStageEmojis);
+                    attempts++;
+                }
+            }
 
             renderGrid('leftGrid', leftCards, 'left');
             renderGrid('rightGrid', rightCards, 'right');
@@ -726,9 +750,15 @@
             initGame();
         }
 
-        // 메인으로 버튼 클릭 시 index.html 페이지로 이동
+        // 이동 및 초기화 이벤트
         document.getElementById('homeBtn').addEventListener('click', () => {
             window.location.href = 'index.html';
+        });
+
+        // 1단계부터 전체 초기화 버튼
+        document.getElementById('resetAllBtn').addEventListener('click', () => {
+            currentStage = 1;
+            initGame();
         });
 
         document.getElementById('soundBtn').addEventListener('click', (e) => {
@@ -736,6 +766,7 @@
             e.target.innerText = soundEnabled ? '🔊' : '🔇';
         });
 
+        // 현재 단계 다시하기 버튼
         document.getElementById('restartBtn').addEventListener('click', () => {
             initGame();
         });
