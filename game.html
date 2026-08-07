@@ -53,7 +53,7 @@
 
         .status-badge {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
         }
 
@@ -392,6 +392,7 @@
         <h1>🧩 반쪽 맞추기</h1>
         <div class="status-badge">
             <div class="badge" id="stageBadge">⭐ 1단계</div>
+            <button class="icon-btn" id="homeBtn" title="첫 화면(1단계)으로">🏠</button>
             <button class="icon-btn" id="soundBtn" title="소리 켜기/끄기">🔊</button>
             <button class="icon-btn" id="restartBtn" title="다시 시작">🔄</button>
         </div>
@@ -702,6 +703,13 @@
             currentStage++;
             initGame();
         }
+
+        // 홈 버튼 이벤트 (1단계로 돌아가기)
+        document.getElementById('homeBtn').addEventListener('click', () => {
+            currentStage = 1;
+            document.getElementById('winModal').classList.remove('active');
+            initGame();
+        });
 
         document.getElementById('soundBtn').addEventListener('click', (e) => {
             soundEnabled = !soundEnabled;
