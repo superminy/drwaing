@@ -11,7 +11,7 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none; /* 드래그 중 스크롤 방지 */
+            touch-action: none;
         }
 
         body {
@@ -26,7 +26,6 @@
             overflow: hidden;
         }
 
-        /* Header */
         header {
             width: 100%;
             max-width: 500px;
@@ -108,7 +107,6 @@
             gap: 12px;
         }
 
-        /* Puzzle Board */
         .board-wrapper {
             background: rgba(255, 255, 255, 0.85);
             padding: 14px;
@@ -150,7 +148,6 @@
             border: 2px solid rgba(255,255,255,0.8);
         }
 
-        /* Drag Over Highlights */
         .cell.valid-hover {
             background-color: #A5D6A7 !important;
             border: 2px solid #2E7D32;
@@ -161,7 +158,6 @@
             border: 2px solid #C62828;
         }
 
-        /* Inventory */
         .inventory-wrapper {
             width: 100%;
             background: rgba(255, 255, 255, 0.9);
@@ -217,7 +213,6 @@
             visibility: hidden;
         }
 
-        /* Floating Drag Ghost */
         #dragGhost {
             position: fixed;
             pointer-events: none;
@@ -228,11 +223,10 @@
             background: rgba(255, 255, 255, 0.9);
             border-radius: 12px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
-            transform: translate(-50%, -50%) scale(1.1);
+            transform: translate(-50%, -50%) scale(1.05);
             border: 2px solid #FF4081;
         }
 
-        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -301,26 +295,22 @@
     </header>
 
     <div class="guide-box" id="guideBox">
-        👆 블록을 터치하면 회전! 🖐️ 끌어서 보드판에 놓아보세요!
+        👆 톡 치면 회전! 🖐️ 끌어서 보드판에 내려놓으세요!
     </div>
 
     <div class="game-container">
-        <!-- Board -->
         <div class="board-wrapper">
             <div class="board-grid" id="boardGrid"></div>
         </div>
 
-        <!-- Inventory -->
         <div class="inventory-wrapper">
-            <div class="inventory-title">📦 남은 블록 조각 (터치: 회전 / 드래그: 이동)</div>
+            <div class="inventory-title">📦 남은 블록 조각 (터치: 회전 / 끌기: 놓기)</div>
             <div class="pieces-list" id="piecesList"></div>
         </div>
     </div>
 
-    <!-- Drag Floating Element -->
     <div id="dragGhost"></div>
 
-    <!-- Clear Modal -->
     <div class="modal-overlay" id="winModal">
         <div class="modal-card">
             <div class="modal-emoji">🎉</div>
@@ -331,7 +321,6 @@
     </div>
 
     <script>
-        // Audio Synthesizer
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
@@ -388,7 +377,6 @@
             }
         }
 
-        // Stages Definition
         const STAGES = [
             {
                 rows: 3, cols: 3,
@@ -432,21 +420,6 @@
                     { id: 'p3_3', shape: [[1, 0], [1, 0], [1, 1]], color: '#D4E157', emoji: '🐤' },
                     { id: 'p3_4', shape: [[1, 1]], color: '#FF4081', emoji: '🎀' }
                 ]
-            },
-            {
-                rows: 4, cols: 4,
-                layout: [
-                    [1, 1, 1, 1],
-                    [1, 1, 1, 1],
-                    [1, 1, 1, 1],
-                    [1, 1, 1, 1]
-                ],
-                pieces: [
-                    { id: 'p4_1', shape: [[1, 1], [1, 1]], color: '#EF5350', emoji: '🍎' },
-                    { id: 'p4_2', shape: [[1, 1, 1, 1]], color: '#42A5F5', emoji: '🚙' },
-                    { id: 'p4_3', shape: [[1, 0], [1, 0], [1, 1]], color: '#66BB6A', emoji: '🌱' },
-                    { id: 'p4_4', shape: [[1, 1, 1], [0, 1, 0]], color: '#AB47BC', emoji: '👑' }
-                ]
             }
         ];
 
@@ -454,9 +427,7 @@
         let boardState = [];
         let availablePieces = [];
 
-        // Drag State
         let activePiece = null;
-        let dragPointerOffset = { x: 0, y: 0 };
         let isDragging = false;
         let dragStartTime = 0;
 
@@ -472,7 +443,6 @@
 
             renderBoard();
             renderPieces();
-            updateGuide('👆 블록을 터치하면 회전! 🖐️ 끌어서 보드판에 놓아보세요!');
         }
 
         function renderBoard() {
@@ -497,7 +467,6 @@
                         cell.classList.add('filled');
                         cell.style.backgroundColor = val.color;
                         cell.innerText = val.emoji;
-                        // 클릭 시 회수
                         cell.addEventListener('pointerdown', () => removePieceFromBoard(val.instanceId));
                     }
 
@@ -534,15 +503,19 @@
                     }
                 }
 
-                // Pointer events for Drag & Tap
                 item.addEventListener('pointerdown', (e) => startDrag(e, p));
                 piecesList.appendChild(item);
             });
         }
 
-        // Pointer Drag & Drop System
         function startDrag(e, piece) {
             initAudio();
+            
+            // 모바일 터치 타겟 락 해제
+            if (e.target && e.target.releasePointerCapture) {
+                try { e.target.releasePointerCapture(e.pointerId); } catch(err) {}
+            }
+
             activePiece = piece;
             isDragging = false;
             dragStartTime = Date.now();
@@ -586,8 +559,7 @@
         function onDragMove(e) {
             if (!activePiece) return;
 
-            // 터치 후 살짝 움직였을 때 드래그 모드로 전환
-            if (!isDragging && Date.now() - dragStartTime > 80) {
+            if (!isDragging && Date.now() - dragStartTime > 50) {
                 isDragging = true;
             }
 
@@ -598,7 +570,16 @@
         function updateGhostPosition(x, y) {
             const dragGhost = document.getElementById('dragGhost');
             dragGhost.style.left = `${x}px`;
-            dragGhost.style.top = `${y - 30}px`; // 손가락 가리지 않게 살짝 위로
+            dragGhost.style.top = `${y - 40}px`;
+        }
+
+        // 손가락 중앙점 기준 위치 자동 계산
+        function getAdjustedStartPos(piece, hoverR, hoverC) {
+            const pRows = piece.shape.length;
+            const pCols = piece.shape[0].length;
+            let startR = hoverR - Math.floor(pRows / 2);
+            let startC = hoverC - Math.floor(pCols / 2);
+            return { startR, startC };
         }
 
         function highlightBoardHover(clientX, clientY) {
@@ -606,8 +587,9 @@
             const targetCell = getCellUnderPointer(clientX, clientY);
             if (!targetCell) return;
 
-            const startR = parseInt(targetCell.dataset.row);
-            const startC = parseInt(targetCell.dataset.col);
+            const hoverR = parseInt(targetCell.dataset.row);
+            const hoverC = parseInt(targetCell.dataset.col);
+            const { startR, startC } = getAdjustedStartPos(activePiece, hoverR, hoverC);
 
             const canPlace = checkCanPlace(activePiece, startR, startC);
             const className = canPlace ? 'valid-hover' : 'invalid-hover';
@@ -621,7 +603,7 @@
                     if (activePiece.shape[r][c]) {
                         let tr = startR + r;
                         let tc = startC + c;
-                        if (tr < stageData.rows && tc < stageData.cols) {
+                        if (tr >= 0 && tr < stageData.rows && tc >= 0 && tc < stageData.cols) {
                             const boardGrid = document.getElementById('boardGrid');
                             const cellEl = boardGrid.querySelector(`[data-row="${tr}"][data-col="${tc}"]`);
                             if (cellEl && !cellEl.classList.contains('empty-hidden')) {
@@ -646,7 +628,6 @@
             const dragGhost = document.getElementById('dragGhost');
             dragGhost.style.display = 'none';
 
-            // 단순 탭인 경우 -> 블록 회전!
             if (!isDragging && (Date.now() - dragStartTime <= 250)) {
                 rotatePiece(activePiece);
                 activePiece = null;
@@ -654,11 +635,11 @@
                 return;
             }
 
-            // 드래그 종료시 놓기 처리
             const targetCell = getCellUnderPointer(e.clientX, e.clientY);
             if (targetCell) {
-                const startR = parseInt(targetCell.dataset.row);
-                const startC = parseInt(targetCell.dataset.col);
+                const hoverR = parseInt(targetCell.dataset.row);
+                const hoverC = parseInt(targetCell.dataset.col);
+                const { startR, startC } = getAdjustedStartPos(activePiece, hoverR, hoverC);
 
                 if (checkCanPlace(activePiece, startR, startC)) {
                     placePiece(activePiece, startR, startC);
@@ -673,11 +654,9 @@
         }
 
         function getCellUnderPointer(x, y) {
-            const dragGhost = document.getElementById('dragGhost');
-            dragGhost.style.pointerEvents = 'none';
             const el = document.elementFromPoint(x, y);
-            if (el && el.classList.contains('cell')) return el;
-            return null;
+            if (!el) return null;
+            return el.closest('.cell');
         }
 
         function rotatePiece(piece) {
@@ -707,9 +686,9 @@
                         let targetR = startR + r;
                         let targetC = startC + c;
 
-                        if (targetR >= stageData.rows || targetC >= stageData.cols) return false;
-                        if (boardState[targetR][targetC] === -1) return false; // 허용되지 않은 칸
-                        if (boardState[targetR][targetC] !== null) return false; // 이미 다른 블록 있음
+                        if (targetR < 0 || targetR >= stageData.rows || targetC < 0 || targetC >= stageData.cols) return false;
+                        if (boardState[targetR][targetC] === -1) return false;
+                        if (boardState[targetR][targetC] !== null) return false;
                     }
                 }
             }
@@ -793,18 +772,12 @@
             initGame();
         }
 
-        function updateGuide(text) {
-            document.getElementById('guideBox').innerText = text;
-        }
-
-        // Global Action Buttons
         document.getElementById('restartBtn').addEventListener('click', initGame);
         document.getElementById('resetAllBtn').addEventListener('click', () => {
             currentStage = 1;
             initGame();
         });
 
-        // Confetti Effect
         function launchConfetti() {
             const canvas = document.getElementById('confetti');
             const ctx = canvas.getContext('2d');
