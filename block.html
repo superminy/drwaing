@@ -90,7 +90,7 @@
             background: #FFFFFF;
             padding: 8px 14px;
             border-radius: 14px;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: #6A1B9A;
             margin-bottom: 10px;
@@ -135,7 +135,7 @@
             font-size: 1.5rem;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
             position: relative;
-            transition: background-color 0.1s ease;
+            transition: transform 0.1s ease, background-color 0.1s ease;
         }
 
         .cell.empty-hidden {
@@ -146,6 +146,11 @@
         .cell.filled {
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             border: 2px solid rgba(255,255,255,0.8);
+            cursor: pointer;
+        }
+
+        .cell.filled:active {
+            transform: scale(0.9);
         }
 
         .cell.valid-hover {
@@ -218,13 +223,13 @@
             pointer-events: none;
             z-index: 1000;
             display: none;
-            grid-gap: 3px;
-            padding: 6px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
+            gap: 6px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
-            transform: translate(-50%, -50%) scale(1.05);
-            border: 2px solid #FF4081;
+            transform: translate(-50%, -50%);
+            border: 3px solid #FF4081;
         }
 
         .modal-overlay {
@@ -295,7 +300,7 @@
     </header>
 
     <div class="guide-box" id="guideBox">
-        👆 톡 치면 회전! 🖐️ 끌어서 보드판에 내려놓으세요!
+        🖐️ 끌어서 놓기 | 👆 톡 치면 회전 | ↩️ 올려둔 블록 터치 시 회수!
     </div>
 
     <div class="game-container">
@@ -304,7 +309,7 @@
         </div>
 
         <div class="inventory-wrapper">
-            <div class="inventory-title">📦 남은 블록 조각 (터치: 회전 / 끌기: 놓기)</div>
+            <div class="inventory-title">📦 남은 블록 조각</div>
             <div class="pieces-list" id="piecesList"></div>
         </div>
     </div>
@@ -357,12 +362,12 @@
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(300, now);
-                osc.frequency.linearRampToValueAtTime(150, now + 0.08);
-                gain.gain.setValueAtTime(0.08, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.08);
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.linearRampToValueAtTime(200, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(now); osc.stop(now + 0.08);
+                osc.start(now); osc.stop(now + 0.1);
             } else if (type === 'win') {
                 [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
                     const osc = audioCtx.createOscillator();
@@ -414,11 +419,12 @@
                     [1, 1, 1, 1],
                     [0, 1, 1, 0]
                 ],
+                // 총 12칸 빈칸에 정확히 맞춰 12칸용 조각 구성 (4+4+2+2 = 12)
                 pieces: [
                     { id: 'p3_1', shape: [[1, 1], [1, 1]], color: '#FF7043', emoji: '🦁' },
-                    { id: 'p3_2', shape: [[1, 1, 0], [0, 1, 1]], color: '#26C6DA', emoji: '🐬' },
-                    { id: 'p3_3', shape: [[1, 0], [1, 0], [1, 1]], color: '#D4E157', emoji: '🐤' },
-                    { id: 'p3_4', shape: [[1, 1]], color: '#FF4081', emoji: '🎀' }
+                    { id: 'p3_2', shape: [[1, 1], [1, 1]], color: '#26C6DA', emoji: '🐬' },
+                    { id: 'p3_3', shape: [[1, 1]], color: '#D4E157', emoji: '🐤' },
+                    { id: 'p3_4', shape: [[1], [1]], color: '#FF4081', emoji: '🎀' }
                 ]
             }
         ];
@@ -467,7 +473,12 @@
                         cell.classList.add('filled');
                         cell.style.backgroundColor = val.color;
                         cell.innerText = val.emoji;
-                        cell.addEventListener('pointerdown', () => removePieceFromBoard(val.instanceId));
+                        
+                        // 보드 위 올려진 블록 터치/클릭 시 꺼내기 기능
+                        cell.addEventListener('pointerdown', (e) => {
+                            e.stopPropagation();
+                            removePieceFromBoard(val.instanceId);
+                        });
                     }
 
                     boardGrid.appendChild(cell);
@@ -511,7 +522,6 @@
         function startDrag(e, piece) {
             initAudio();
             
-            // 모바일 터치 타겟 락 해제
             if (e.target && e.target.releasePointerCapture) {
                 try { e.target.releasePointerCapture(e.pointerId); } catch(err) {}
             }
@@ -525,24 +535,26 @@
             
             const rows = piece.shape.length;
             const cols = piece.shape[0].length;
-            dragGhost.style.gridTemplateRows = `repeat(${rows}, 44px)`;
-            dragGhost.style.gridTemplateColumns = `repeat(${cols}, 44px)`;
+            
+            dragGhost.style.gridTemplateRows = `repeat(${rows}, 50px)`;
+            dragGhost.style.gridTemplateColumns = `repeat(${cols}, 50px)`;
             dragGhost.innerHTML = '';
 
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
                     const cell = document.createElement('div');
-                    cell.style.width = '44px';
-                    cell.style.height = '44px';
-                    cell.style.borderRadius = '8px';
+                    cell.style.width = '50px';
+                    cell.style.height = '50px';
+                    cell.style.borderRadius = '10px';
                     cell.style.display = 'flex';
                     cell.style.alignItems = 'center';
                     cell.style.justifyContent = 'center';
-                    cell.style.fontSize = '1.3rem';
+                    cell.style.fontSize = '1.5rem';
 
                     if (piece.shape[r][c]) {
                         cell.style.backgroundColor = piece.color;
                         cell.innerText = piece.emoji;
+                        cell.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
                     } else {
                         cell.style.visibility = 'hidden';
                     }
@@ -559,7 +571,7 @@
         function onDragMove(e) {
             if (!activePiece) return;
 
-            if (!isDragging && Date.now() - dragStartTime > 50) {
+            if (!isDragging && Date.now() - dragStartTime > 40) {
                 isDragging = true;
             }
 
@@ -573,7 +585,28 @@
             dragGhost.style.top = `${y - 40}px`;
         }
 
-        // 손가락 중앙점 기준 위치 자동 계산
+        function getBoardCellFromPos(x, y) {
+            const boardGrid = document.getElementById('boardGrid');
+            const rect = boardGrid.getBoundingClientRect();
+
+            if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+                return null;
+            }
+
+            const stageData = STAGES[(currentStage - 1) % STAGES.length];
+            const relX = x - rect.left - 8;
+            const relY = y - rect.top - 8;
+            const step = 56;
+
+            const col = Math.floor(relX / step);
+            const row = Math.floor(relY / step);
+
+            if (row >= 0 && row < stageData.rows && col >= 0 && col < stageData.cols) {
+                return { row, col };
+            }
+            return null;
+        }
+
         function getAdjustedStartPos(piece, hoverR, hoverC) {
             const pRows = piece.shape.length;
             const pCols = piece.shape[0].length;
@@ -584,13 +617,10 @@
 
         function highlightBoardHover(clientX, clientY) {
             clearHighlights();
-            const targetCell = getCellUnderPointer(clientX, clientY);
-            if (!targetCell) return;
+            const target = getBoardCellFromPos(clientX, clientY - 40);
+            if (!target) return;
 
-            const hoverR = parseInt(targetCell.dataset.row);
-            const hoverC = parseInt(targetCell.dataset.col);
-            const { startR, startC } = getAdjustedStartPos(activePiece, hoverR, hoverC);
-
+            const { startR, startC } = getAdjustedStartPos(activePiece, target.row, target.col);
             const canPlace = checkCanPlace(activePiece, startR, startC);
             const className = canPlace ? 'valid-hover' : 'invalid-hover';
 
@@ -635,28 +665,22 @@
                 return;
             }
 
-            const targetCell = getCellUnderPointer(e.clientX, e.clientY);
-            if (targetCell) {
-                const hoverR = parseInt(targetCell.dataset.row);
-                const hoverC = parseInt(targetCell.dataset.col);
-                const { startR, startC } = getAdjustedStartPos(activePiece, hoverR, hoverC);
+            const target = getBoardCellFromPos(e.clientX, e.clientY - 40);
+            if (target) {
+                const { startR, startC } = getAdjustedStartPos(activePiece, target.row, target.col);
 
                 if (checkCanPlace(activePiece, startR, startC)) {
                     placePiece(activePiece, startR, startC);
                 } else {
                     playSound('remove');
                 }
+            } else {
+                playSound('remove');
             }
 
             clearHighlights();
             activePiece = null;
             isDragging = false;
-        }
-
-        function getCellUnderPointer(x, y) {
-            const el = document.elementFromPoint(x, y);
-            if (!el) return null;
-            return el.closest('.cell');
         }
 
         function rotatePiece(piece) {
@@ -721,6 +745,7 @@
             checkWin();
         }
 
+        // 보드판에서 인벤토리로 다시 꺼내는 함수
         function removePieceFromBoard(instanceId) {
             playSound('remove');
             let removedPieceData = null;
